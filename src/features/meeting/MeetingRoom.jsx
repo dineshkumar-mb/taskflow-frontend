@@ -12,6 +12,7 @@ export const MeetingRoom = () => {
 
   const [meeting, setMeeting] = useState(null);
   const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
 
@@ -116,7 +117,13 @@ export const MeetingRoom = () => {
   };
 
   const handleNewTranscript = (data) => {
-      // Add incoming transcript to our text
+      transcriptSegmentsRef.current.push({
+          timestamp: data.timestamp || new Date(),
+          speakerId: data.userId,
+          speakerName: data.userName,
+          text: data.text,
+          duration: 0
+      });
       setTranscript(prev => prev + '\n' + data.userName + ': ' + data.text);
   };
 
@@ -139,6 +146,7 @@ export const MeetingRoom = () => {
     };
 
     recognitionRef.current.onresult = (event) => {
+      let currentInterim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const resultText = event.results[i][0].transcript;
 
@@ -160,12 +168,16 @@ export const MeetingRoom = () => {
           });
 
           setTranscript(prev => prev + '\nMe: ' + resultText);
+        } else {
+          currentInterim += resultText;
         }
       }
+      setInterimTranscript(currentInterim);
     };
 
     recognitionRef.current.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
+      if (event.error === 'aborted' || event.error === 'no-speech') return;
+      console.warn('Speech recognition error:', event.error);
     };
 
     recognitionRef.current.onend = () => {
@@ -265,6 +277,9 @@ export const MeetingRoom = () => {
                 <span className="text-v-muted text-center mt-10 italic">
                     Start speaking... Transcript will appear here.
                 </span>
+            )}
+            {interimTranscript && (
+                <span className="text-blue-400 italic animate-pulse">Me: {interimTranscript}</span>
             )}
         </div>
       </div>
