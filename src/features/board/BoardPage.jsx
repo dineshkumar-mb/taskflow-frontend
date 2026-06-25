@@ -9,6 +9,7 @@ import Column from './Column';
 import IssueCard from './IssueCard';
 import IssueModal from './IssueModal';
 import CreateIssueModal from './CreateIssueModal';
+import { MeetingScheduler } from '../meeting/MeetingScheduler';
 import { Loader2, Plus, Filter, Search } from 'lucide-react';
 import { socket } from '../../utils/socket';
 import { toast } from 'react-toastify';
@@ -257,6 +258,7 @@ const BoardPage = () => {
                         <Plus className="h-4 w-4" />
                         <span className="hidden sm:inline">Create Issue</span>
                     </button>
+                    <MeetingScheduler projectId={projectId} onSuccess={(meeting) => toast.success(`Meeting '${meeting.title}' scheduled!`)} />
                 </div>
             </div>
 

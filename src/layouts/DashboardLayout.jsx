@@ -107,6 +107,7 @@ const DashboardLayout = () => {
     const getPageTitle = () => {
         if (location.pathname === '/dashboard') return 'Overview';
         if (location.pathname === '/projects') return 'Projects';
+        if (location.pathname === '/meetings') return 'Meetings';
         if (location.pathname === '/pricing') return 'Pricing';
         if (location.pathname === '/billing') return 'Billing';
         if (location.pathname.includes('/board')) return 'Board';
@@ -141,6 +142,7 @@ const DashboardLayout = () => {
             <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
                 <NavLink to="/dashboard" active={isActive('/dashboard')} icon={<LayoutDashboard size={18} />} label="Overview" collapsed={collapsed} />
                 <NavLink to="/projects" active={isActive('/projects')} icon={<Layers size={18} />} label="Projects" collapsed={collapsed} />
+                <NavLink to="/meetings" active={isActive('/meetings')} icon={<Video size={18} />} label="Meetings" collapsed={collapsed} />
                 <NavLink to="/members" active={isPathActive('/members')} icon={<Users size={18} />} label="Members" collapsed={collapsed} />
                 <NavLink to="/billing" active={isActive('/billing')} icon={<Zap size={18} />} label="Billing" collapsed={collapsed} />
                 <NavLink to="/pricing" active={isActive('/pricing')} icon={<Rocket size={18} />} label="Upgrade" collapsed={collapsed} />
@@ -241,6 +243,7 @@ const DashboardLayout = () => {
                 <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
                     <NavLink to="/dashboard" active={isActive('/dashboard')} icon={<LayoutDashboard size={18} />} label="Overview" collapsed={false} />
                     <NavLink to="/projects" active={isActive('/projects')} icon={<Layers size={18} />} label="Projects" collapsed={false} />
+                    <NavLink to="/meetings" active={isActive('/meetings')} icon={<Video size={18} />} label="Meetings" collapsed={false} />
                     <NavLink to="/members" active={isPathActive('/members')} icon={<Users size={18} />} label="Members" collapsed={false} />
                     <NavLink to="/billing" active={isActive('/billing')} icon={<Zap size={18} />} label="Billing" collapsed={false} />
                     <NavLink to="/pricing" active={isActive('/pricing')} icon={<Rocket size={18} />} label="Upgrade" collapsed={false} />
@@ -317,6 +320,11 @@ const DashboardLayout = () => {
                     </div>
 
                     <div className="flex items-center gap-4 text-sm text-v-muted flex-shrink-0 relative">
+                        {/* Meetings Quick Link */}
+                        <Link to="/meetings" className="p-2 text-v-muted hover:text-v-main rounded-full hover:bg-v-secondary transition-colors" title="Meetings">
+                            <Video size={18} />
+                        </Link>
+                        
                         {/* Theme Toggle */}
                         <button
                             onClick={toggleTheme}

@@ -23,6 +23,9 @@ const SprintPage = lazy(() => import('./features/sprint/SprintPage'));
 const ReportsPage = lazy(() => import('./features/report/ReportsPage'));
 const MembersPage = lazy(() => import('./features/members/MembersPage'));
 const ProjectSettingsPage = lazy(() => import('./features/project/ProjectSettingsPage'));
+const GlobalMeetingsPage = lazy(() => import('./features/meeting/GlobalMeetingsPage').then(m => ({ default: m.GlobalMeetingsPage })));
+const MeetingRoom = lazy(() => import('./features/meeting/MeetingRoom').then(m => ({ default: m.MeetingRoom })));
+const MOMPreview = lazy(() => import('./features/meeting/MOMPreview').then(m => ({ default: m.MOMPreview })));
 const ServerWakeUpBanner = lazy(() => import('./components/ui/ServerWakeUpBanner'));
 
 const LoadingFallback = () => (
@@ -71,6 +74,7 @@ function App() {
             <Route path="projects" element={<DashboardPage />} />
             <Route path="pricing" element={<PricingPage />} />
             <Route path="billing" element={<BillingPage />} />
+            <Route path="meetings" element={<GlobalMeetingsPage />} />
             <Route path="accept-invite" element={<AcceptInvite />} />
             <Route path="project/:projectId/board" element={<BoardPage />} />
             <Route path="project/:projectId/backlog" element={<BacklogPage />} />
@@ -78,7 +82,15 @@ function App() {
             <Route path="project/:projectId/reports" element={<ReportsPage />} />
             <Route path="project/:projectId/settings" element={<ProjectSettingsPage />} />
             <Route path="members" element={<MembersPage />} />
+            <Route path="meetings/:meetingId/mom" element={<MOMPreview />} />
           </Route>
+          
+          {/* Full Screen Meeting Room (Outside DashboardLayout) */}
+          <Route path="/meetings/:meetingId/join" element={
+            <Suspense fallback={<LoadingFallback />}>
+                <MeetingRoom />
+            </Suspense>
+          } />
         </Routes>
       </Suspense>
       <ToastContainer position="top-right" autoClose={3000} />
