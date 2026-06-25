@@ -452,13 +452,13 @@ const IssueModal = ({ isOpen, onClose, issue }) => {
                                         return (
                                             <a
                                                 key={i}
-                                                href={`http://localhost:5001${url}`}
+                                                href={`${BACKEND_URL}${url}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="group relative block aspect-video rounded-lg border border-v-border bg-v-secondary flex flex-col items-center justify-center overflow-hidden hover:border-blue-500/50 transition-colors"
                                             >
                                                 {isImage ? (
-                                                    <img src={`http://localhost:5001${url}`} alt={fileName} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                                    <img src={`${BACKEND_URL}${url}`} alt={fileName} className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                                                 ) : (
                                                     <File size={24} className="text-v-muted mb-1" />
                                                 )}
