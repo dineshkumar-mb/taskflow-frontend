@@ -8,24 +8,14 @@ const BillingPage = () => {
     const handleManageSubscription = async () => {
         setLoading(true);
         try {
-            // For Cashfree, we use /billing/checkout to get a session
-            const res = await axiosInstance.post('/billing/checkout', { plan: 'pro' });
-
-            if (res.data.sessionId && window.Cashfree) {
-                const cashfree = window.Cashfree({
-                    mode: "sandbox" // Default to sandbox for safety
-                });
-
-                await cashfree.checkout({
-                    paymentSessionId: res.data.sessionId,
-                    redirectTarget: "_self"
-                });
-            } else if (res.data.url) {
+            // Use /billing/checkout to get a Stripe session
+            const res = await axiosInstance.post('/billing/checkout', { planPriceId: 'price_pro' });
+            if (res.data.url) {
                 window.location.href = res.data.url;
             }
         } catch (error) {
             console.error('Checkout Error:', error);
-            alert('Failed to initialize Cashfree. Please try again.');
+            alert('Failed to initialize billing. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -35,7 +25,7 @@ const BillingPage = () => {
         <div className="p-8 max-w-4xl mx-auto">
             <header className="mb-10">
                 <h1 className="text-3xl font-bold text-v-main">Billing & Subscription</h1>
-                <p className="text-v-muted">Manage your plan via Cashfree (India).</p>
+                <p className="text-v-muted">Manage your plan via Stripe.</p>
             </header>
 
             <div className="bg-v-primary rounded-2xl shadow-sm border border-v-border p-8 mb-8 transition-colors">
@@ -55,7 +45,7 @@ const BillingPage = () => {
                                 disabled={loading}
                                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95 disabled:opacity-50"
                             >
-                                {loading ? 'Loading...' : 'Upgrade with Cashfree'}
+                                {loading ? 'Loading...' : 'Upgrade with Stripe'}
                                 <ExternalLink size={18} />
                             </button>
                         </div>
@@ -63,7 +53,7 @@ const BillingPage = () => {
 
                     <div className="hidden md:block">
                         <div className="p-6 bg-v-secondary rounded-2xl border border-v-border italic text-v-muted text-sm shadow-inner transition-colors">
-                            "Securely managed by Cashfree Payments"
+                            "Securely managed by Stripe Payments"
                         </div>
                     </div>
                 </div>
