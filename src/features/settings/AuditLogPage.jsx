@@ -14,7 +14,9 @@ const AuditLogPage = () => {
     const [filters, setFilters] = useState({ entityType: '', user: '' });
 
     // Only Admins / those with '*' permission should access
-    const canViewAudit = ['OrgOwner', 'Admin', 'SuperAdmin'].includes(user?.role) || user?.role?.permissions?.includes('*');
+    const userRole = typeof user?.role === 'object' ? user?.role?.name : (user?.role || user?.roleName);
+    const rolePermissions = typeof user?.role === 'object' ? user?.role?.permissions : [];
+    const canViewAudit = ['OrgOwner', 'Admin', 'SuperAdmin'].includes(userRole) || rolePermissions?.includes('*');
 
     const fetchLogs = async (currentPage = 1) => {
         try {

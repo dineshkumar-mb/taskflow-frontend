@@ -26,7 +26,8 @@ const MembersPage = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const isAdmin = ['OrgOwner', 'Admin'].includes(user?.role);
+    const userRole = typeof user?.role === 'object' ? user?.role?.name : (user?.role || user?.roleName);
+    const isAdmin = ['OrgOwner', 'Admin'].includes(userRole);
 
     const fetchMembers = async () => {
         try {

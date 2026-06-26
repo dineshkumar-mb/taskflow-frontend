@@ -54,7 +54,8 @@ const DashboardLayout = () => {
     const { notifications, unreadCount } = useSelector((state) => state.notification);
     const { isDarkMode, toggleTheme } = useTheme();
 
-    const isAdminOrPM = ['OrgOwner', 'Admin', 'SuperAdmin'].includes(user?.role);
+    const userRole = typeof user?.role === 'object' ? user?.role?.name : (user?.role || user?.roleName);
+    const isAdminOrPM = ['OrgOwner', 'Admin', 'SuperAdmin', 'Project Manager'].includes(userRole);
 
     // Desktop: collapsed/expanded. Mobile: drawer open/closed.
     const [collapsed, setCollapsed] = useState(false);
@@ -300,7 +301,7 @@ const DashboardLayout = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-v-main truncate">{user.name}</p>
-                            <p className="text-xs text-v-muted">{user.role}</p>
+                            <p className="text-xs text-v-muted">{user?.role?.name || user?.roleName || 'Member'}</p>
                         </div>
                         <button onClick={handleLogout} className="text-v-muted hover:text-red-400" title="Logout">
                             <LogOut size={16} />

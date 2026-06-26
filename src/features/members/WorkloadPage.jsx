@@ -123,7 +123,7 @@ const WorkloadPage = () => {
                                             </div>
                                             <div>
                                                 <p className="font-medium text-v-main">{data.user.name}</p>
-                                                <p className="text-xs text-v-muted">{data.user.role || 'Member'}</p>
+                                                <p className="text-xs text-v-muted">{typeof data.user.role === 'object' ? data.user.role?.name : (data.user.role || data.user.roleName || 'Member')}</p>
                                             </div>
                                         </div>
                                     </td>
