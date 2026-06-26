@@ -33,7 +33,7 @@ export const MeetingRoom = () => {
   // Fetch meeting data on mount
   useEffect(() => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: window.location.pathname + window.location.search } });
       return;
     }
     fetchMeeting();

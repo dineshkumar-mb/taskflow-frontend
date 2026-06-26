@@ -64,7 +64,7 @@ const DashboardLayout = () => {
     const [showChatSidebar, setShowChatSidebar] = useState(false);
     const { activeConversation } = useSelector((state) => state.chat);
 
-    useEffect(() => { if (!user) navigate('/login'); }, [user, navigate]);
+    useEffect(() => { if (!user) navigate('/login', { state: { from: location.pathname + location.search } }); }, [user, navigate, location]);
 
     useEffect(() => {
         if (user) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -77,7 +77,9 @@ const OrbitRing = ({ diameter, thickness = 2, color = 'rgba(255,255,255,0.2)', a
 /* ── Main LoginPage ─────────────────────────────────────── */
 const LoginPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
+    const from = location.state?.from || '/dashboard';
     const [showPass, setShowPass] = useState(false);
     const [twoFactorCode, setTwoFactorCode] = useState('');
 
@@ -100,9 +102,9 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (isError) toast.error(message);
-        if (isSuccess || user) navigate('/dashboard');
+        if (isSuccess || user) navigate(from);
         dispatch(reset());
-    }, [user, isError, isSuccess, message, navigate, dispatch]);
+    }, [user, isError, isSuccess, message, navigate, dispatch, from]);
 
     const onSubmit = (data) => dispatch(login(data));
 
