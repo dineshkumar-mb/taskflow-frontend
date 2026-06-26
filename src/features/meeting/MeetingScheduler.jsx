@@ -44,7 +44,7 @@ export const MeetingScheduler = ({ projectId, onSuccess }) => {
       const response = await axios.post('/meetings', {
         title,
         agenda,
-        scheduledAt,
+        scheduledAt: new Date(scheduledAt).toISOString(),
         projectId: selectedProjectId,
         participantIds: participants
       });
