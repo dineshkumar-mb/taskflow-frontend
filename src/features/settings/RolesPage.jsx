@@ -22,7 +22,9 @@ const RolesPage = () => {
     const [formData, setFormData] = useState({ name: '', description: '', permissions: [] });
 
     // Ensure user has permission
-    const canManageRoles = ['OrgOwner', 'Admin', 'SuperAdmin'].includes(user?.role) || user?.role?.permissions?.includes('manage_users') || user?.role?.permissions?.includes('*');
+    const userRole = typeof user?.role === 'object' ? user?.role?.name : (user?.role || user?.roleName);
+    const rolePermissions = typeof user?.role === 'object' ? user?.role?.permissions : [];
+    const canManageRoles = ['OrgOwner', 'Admin', 'SuperAdmin'].includes(userRole) || rolePermissions?.includes('manage_users') || rolePermissions?.includes('*');
 
     const fetchRoles = async () => {
         try {

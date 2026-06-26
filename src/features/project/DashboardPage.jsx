@@ -12,7 +12,8 @@ const DashboardPage = () => {
     const { user } = useSelector((state) => state.auth);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const isAdminOrPM = ['OrgOwner', 'Admin', 'Project Manager'].includes(user?.role);
+    const userRole = typeof user?.role === 'object' ? user?.role?.name : (user?.role || user?.roleName);
+    const isAdminOrPM = ['OrgOwner', 'Admin', 'Project Manager'].includes(userRole);
 
     useEffect(() => {
         // Projects are fetched by DashboardLayout
@@ -76,11 +77,11 @@ const DashboardPage = () => {
                                 {/* Project header */}
                                 <div className="flex items-center gap-3">
                                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-500 text-white font-bold text-sm shadow-sm ring-1 ring-white/10">
-                                        {project.key.substring(0, 2)}
+                                        {project.key ? project.key.substring(0, 2) : project.name.substring(0, 2).toUpperCase()}
                                     </div>
                                     <div className="min-w-0">
                                         <h3 className="font-semibold text-v-main truncate">{project.name}</h3>
-                                        <p className="text-xs text-v-muted font-mono">{project.key}</p>
+                                        <p className="text-xs text-v-muted font-mono">{project.key || 'NO-KEY'}</p>
                                     </div>
                                 </div>
 

@@ -171,7 +171,7 @@ const DashboardLayout = () => {
                                 }`}
                         >
                             <div className="flex-shrink-0 flex h-5 w-5 items-center justify-center rounded bg-blue-500 text-[10px] font-bold text-white">
-                                {project.key?.substring(0, 2)}
+                                {project.key ? project.key.substring(0, 2) : project.name.substring(0, 2).toUpperCase()}
                             </div>
                             {!collapsed && (
                                 <>
@@ -207,7 +207,7 @@ const DashboardLayout = () => {
                     {!collapsed && (
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-v-main truncate">{user.name}</p>
-                            <p className="text-xs text-v-muted shrink-0">{user.role}</p>
+                            <p className="text-xs text-v-muted shrink-0">{user?.role?.name || user?.roleName || 'Member'}</p>
                         </div>
                     )}
                     {!collapsed && (
