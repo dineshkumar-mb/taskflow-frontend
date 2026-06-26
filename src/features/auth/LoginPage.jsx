@@ -344,6 +344,7 @@ const LoginPage = () => {
                                         <input
                                             type={showPass ? 'text' : 'password'}
                                             placeholder="••••••••"
+                                            autoComplete="current-password"
                                             {...register('password')}
                                             style={{
                                                 width: '100%', padding: '11px 50px 11px 16px',

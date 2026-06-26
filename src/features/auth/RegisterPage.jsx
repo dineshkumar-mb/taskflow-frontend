@@ -231,7 +231,7 @@ const RegisterPage = () => {
                             <div>
                                 <label style={{ color: 'rgba(209,213,219,1)', fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Password</label>
                                 <div style={{ position: 'relative' }}>
-                                    <input type={showPass ? 'text' : 'password'} placeholder="Min. 6 characters" {...register('password')}
+                                    <input type={showPass ? 'text' : 'password'} placeholder="Min. 6 characters" autoComplete="new-password" {...register('password')}
                                         style={{ ...inputStyle(errors.password), paddingRight: 50 }}
                                         onFocus={onFocus} onBlur={onBlur(errors.password)} />
                                     <button type="button" onClick={() => setShowPass(v => !v)}
