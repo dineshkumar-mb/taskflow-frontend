@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
-import { Shield, Plus, Edit2, Trash2, Check, X, ShieldAlert } from 'lucide-react';
+import { Shield, Plus, Edit2, Trash2, Check, X, ShieldAlert, Loader2 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 const AVAILABLE_PERMISSIONS = [
