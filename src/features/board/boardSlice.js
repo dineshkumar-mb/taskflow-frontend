@@ -185,6 +185,23 @@ export const boardSlice = createSlice({
             .addCase(reorderIssues.fulfilled, (state, action) => {
                 const index = state.issues.findIndex((i) => i._id === action.payload._id);
                 if (index !== -1) state.issues[index] = action.payload;
+            })
+            .addCase(reorderIssues.rejected, (state, action) => {
+                // Revert optimistic update using previous data from args
+                const { issueId, previousStatus, previousPosition, previousSprint } = action.meta.arg;
+                const index = state.issues.findIndex((i) => i._id === issueId);
+                if (index !== -1) {
+                    if (previousStatus) state.issues[index].status = previousStatus;
+                    if (previousPosition !== undefined) state.issues[index].position = previousPosition;
+                    if (previousSprint !== undefined) state.issues[index].sprint = previousSprint;
+                }
+            })
+            .addCase(updateIssueStatus.rejected, (state, action) => {
+                const { issueId, previousStatus } = action.meta.arg;
+                const index = state.issues.findIndex((i) => i._id === issueId);
+                if (index !== -1 && previousStatus) {
+                    state.issues[index].status = previousStatus;
+                }
             });
     },
 });

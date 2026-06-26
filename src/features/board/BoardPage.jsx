@@ -10,8 +10,10 @@ import IssueCard from './IssueCard';
 import IssueModal from './IssueModal';
 import CreateIssueModal from './CreateIssueModal';
 import { MeetingScheduler } from '../meeting/MeetingScheduler';
-import { Loader2, Plus, Filter, Search } from 'lucide-react';
+import AIRiskPanel from '../dashboard/AIRiskPanel';
+import { Loader2, Plus, Filter, Search, Sparkles } from 'lucide-react';
 import { socket } from '../../utils/socket';
+import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { filterIssuesJQL } from '../../utils/jql';
 import { useHotkeys } from '../../hooks/useHotkeys';
@@ -28,6 +30,7 @@ const BoardPage = () => {
     const [assigneeFilter, setAssigneeFilter] = useState('all');
     const [jqlQuery, setJqlQuery] = useState('');
     const [orgUsers, setOrgUsers] = useState([]);
+    const [isAILoading, setIsAILoading] = useState(false);
     const [activeDragIssue, setActiveDragIssue] = useState(null);
     const { user } = useSelector((state) => state.auth);
 
@@ -78,6 +81,40 @@ const BoardPage = () => {
             });
         }
     }, [user]);
+
+    const handleAIFilter = async () => {
+        if (!jqlQuery.trim()) {
+            toast.info("Please type what you're looking for in the search bar first.");
+            return;
+        }
+
+        setIsAILoading(true);
+        try {
+            const { data } = await axiosInstance.post('/ai/parse-search', { query: jqlQuery });
+            
+            if (data.typeFilter && data.typeFilter !== 'all') setTypeFilter(data.typeFilter);
+            if (data.priorityFilter && data.priorityFilter !== 'all') {
+                // Currently board doesn't have a priority dropdown, but it filters via JQL. 
+                // Let's just set the textQuery for priority if there's no native filter.
+                // Wait, board has typeFilter and assigneeFilter natively.
+            }
+            if (data.assigneeQuery && orgUsers.length > 0) {
+                // find user
+                const u = orgUsers.find(u => u.name.toLowerCase().includes(data.assigneeQuery.toLowerCase()));
+                if (u) setAssigneeFilter(u._id);
+            }
+            if (data.textQuery) {
+                setJqlQuery(data.textQuery);
+            } else {
+                setJqlQuery(''); // Clear if fully parsed
+            }
+            toast.success("AI applied filters successfully!");
+        } catch (err) {
+            toast.error("AI couldn't understand that query. Try being more specific.");
+        } finally {
+            setIsAILoading(false);
+        }
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -139,7 +176,10 @@ const BoardPage = () => {
                 status: newStatus,
                 position,
                 projectId,
-                sprintId: activeIssue.sprint?._id || activeIssue.sprint
+                sprintId: activeIssue.sprint?._id || activeIssue.sprint,
+                previousStatus: activeIssue.status,
+                previousPosition: activeIssue.position,
+                previousSprint: activeIssue.sprint?._id || activeIssue.sprint
             }));
             // No need for separate socket.emit; the backend reorderIssues service handles it
         }
@@ -196,7 +236,7 @@ const BoardPage = () => {
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap sm:ml-auto">
-                    {/* JQL Search Bar */}
+                    {/* JQL Search Bar with AI Button */}
                     <div className="relative flex items-center">
                         <Search className="absolute left-2.5 h-3.5 w-3.5 text-v-muted" />
                         <input
@@ -205,8 +245,17 @@ const BoardPage = () => {
                             placeholder="Press / to search..."
                             value={jqlQuery}
                             onChange={(e) => setJqlQuery(e.target.value)}
-                            className="w-full sm:w-48 rounded-md border border-v-border bg-v-primary py-1.5 pl-8 pr-3 text-xs sm:text-sm text-v-main placeholder:text-v-muted focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onKeyDown={(e) => e.key === 'Enter' && handleAIFilter()}
+                            className="w-full sm:w-56 rounded-l-md border border-r-0 border-v-border bg-v-primary py-1.5 pl-8 pr-3 text-xs sm:text-sm text-v-main placeholder:text-v-muted focus:outline-none focus:border-blue-500"
                         />
+                        <button
+                            onClick={handleAIFilter}
+                            disabled={isAILoading}
+                            className="flex items-center justify-center rounded-r-md border border-v-border bg-v-secondary px-3 py-1.5 text-v-main hover:bg-purple-500/10 hover:text-purple-400 hover:border-purple-500/50 transition-colors disabled:opacity-50 h-full"
+                            title="Ask AI to filter"
+                        >
+                            {isAILoading ? <Loader2 size={14} className="animate-spin text-purple-400" /> : <Sparkles size={14} className="text-purple-400" />}
+                        </button>
                     </div>
 
                     {/* Sprint filter */}
@@ -260,6 +309,10 @@ const BoardPage = () => {
                     </button>
                     <MeetingScheduler projectId={projectId} onSuccess={(meeting) => toast.success(`Meeting '${meeting.title}' scheduled!`)} />
                 </div>
+            </div>
+
+            <div className="px-4 py-2 sm:px-6 bg-v-secondary">
+                <AIRiskPanel projectId={projectId} projectName={currentBoard.name} />
             </div>
 
             {/* Board Columns - horizontal scroll on mobile */}

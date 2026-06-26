@@ -93,8 +93,26 @@ const CreateIssueModal = ({ isOpen, onClose }) => {
                     </button>
                 </div>
 
-                <div className="px-5 py-2 border-b border-v-border bg-v-secondary/30">
+                <div className="px-5 py-2 border-b border-v-border bg-v-secondary/30 flex justify-between items-center">
                     <AIIssueGenerator projectId={projectId} onIssueCreated={() => { onClose(); dispatch(getIssues(projectId)); }} />
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-v-muted">Templates:</span>
+                        <select
+                            onChange={(e) => {
+                                const template = e.target.value;
+                                if (template === 'bug') {
+                                    reset({ type: 'bug', priority: 'high', title: '[BUG] ', description: '**Steps to reproduce:**\n1.\n2.\n3.\n\n**Expected Behavior:**\n\n**Actual Behavior:**\n' });
+                                } else if (template === 'feature') {
+                                    reset({ type: 'story', priority: 'medium', title: '[FEATURE] ', description: '**As a** [role]\n**I want** [feature]\n**So that** [benefit]\n\n**Acceptance Criteria:**\n- [ ]\n' });
+                                }
+                            }}
+                            className="rounded border border-v-border bg-v-secondary px-2 py-1 text-xs text-v-main focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        >
+                            <option value="">Select...</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="feature">Feature Request</option>
+                        </select>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="px-5 py-4 space-y-4">

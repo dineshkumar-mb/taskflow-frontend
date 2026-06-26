@@ -19,6 +19,7 @@ export const register = createAsyncThunk(
                     email: response.data.email,
                     role: response.data.role,
                     organizationId: response.data.organizationId,
+                    isTwoFactorEnabled: response.data.isTwoFactorEnabled,
                 }));
             }
             return response.data;
@@ -34,10 +35,33 @@ export const register = createAsyncThunk(
     }
 );
 
-// Login user
 export const login = createAsyncThunk('auth/login', async (user, thunkAPI) => {
     try {
         const response = await axiosInstance.post(`/auth/login`, user);
+        if (response.data && !response.data.requires2FA) {
+            localStorage.setItem('user', JSON.stringify({
+                _id: response.data._id,
+                name: response.data.name,
+                email: response.data.email,
+                role: response.data.role,
+                organizationId: response.data.organizationId,
+                isTwoFactorEnabled: response.data.isTwoFactorEnabled,
+            }));
+        }
+        return response.data;
+    } catch (error) {
+        const message =
+            (error.response && error.response.data && error.response.data.message) ||
+            error.message ||
+            error.toString();
+        return thunkAPI.rejectWithValue(message);
+    }
+});
+
+// Verify 2FA
+export const verify2FA = createAsyncThunk('auth/verify2FA', async (data, thunkAPI) => {
+    try {
+        const response = await axiosInstance.post(`/auth/2fa/verify`, data);
         if (response.data) {
             localStorage.setItem('user', JSON.stringify({
                 _id: response.data._id,
@@ -45,6 +69,7 @@ export const login = createAsyncThunk('auth/login', async (user, thunkAPI) => {
                 email: response.data.email,
                 role: response.data.role,
                 organizationId: response.data.organizationId,
+                isTwoFactorEnabled: response.data.isTwoFactorEnabled,
             }));
         }
         return response.data;
@@ -111,6 +136,7 @@ export const initializeAuth = createAsyncThunk(
                     email: response.data.email,
                     role: response.data.role,
                     organizationId: response.data.organizationId,
+                    isTwoFactorEnabled: response.data.isTwoFactorEnabled,
                 }));
             }
             return response.data;
@@ -130,6 +156,8 @@ const initialState = {
     isLoading: false,
     isError: false,
     isSuccess: false,
+    requires2FA: false,
+    tempUserId: null,
     message: '',
 };
 
@@ -142,6 +170,12 @@ export const authSlice = createSlice({
             state.isSuccess = false;
             state.isError = false;
             state.message = '';
+        },
+        updateUser: (state, action) => {
+            if (state.user) {
+                state.user = { ...state.user, ...action.payload };
+                localStorage.setItem('user', JSON.stringify(state.user));
+            }
         },
     },
     extraReducers: (builder) => {
@@ -167,9 +201,15 @@ export const authSlice = createSlice({
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.isSuccess = true;
-                state.user = action.payload;
-                state.isAuthenticated = true;
+                if (action.payload.requires2FA) {
+                    state.requires2FA = true;
+                    state.tempUserId = action.payload.userId;
+                    state.isSuccess = false;
+                } else {
+                    state.isSuccess = true;
+                    state.user = action.payload;
+                    state.isAuthenticated = true;
+                }
             })
             .addCase(login.rejected, (state, action) => {
                 state.isLoading = false;
@@ -177,6 +217,23 @@ export const authSlice = createSlice({
                 state.message = action.payload;
                 state.user = null;
                 state.isAuthenticated = false;
+                state.requires2FA = false;
+            })
+            .addCase(verify2FA.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(verify2FA.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                state.user = action.payload;
+                state.isAuthenticated = true;
+                state.requires2FA = false;
+                state.tempUserId = null;
+            })
+            .addCase(verify2FA.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isError = true;
+                state.message = action.payload;
             })
             .addCase(logout.fulfilled, (state) => {
                 state.user = null;
@@ -195,5 +252,5 @@ export const authSlice = createSlice({
     },
 });
 
-export const { reset } = authSlice.actions;
+export const { reset, updateUser } = authSlice.actions;
 export default authSlice.reducer;

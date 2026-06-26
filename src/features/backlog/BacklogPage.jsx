@@ -4,10 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getIssues, updateIssue, moveIssueOptimistic, reorderIssues, moveIssueBetweenSprintsOptimistic } from '../board/boardSlice';
 import { getSprints, createSprint, startSprint, completeSprint } from '../sprint/sprintSlice';
 import { toast } from 'react-toastify';
-import { ListTodo, Plus, Loader2, ChevronRight, Bug, BookOpen, CheckSquare, Zap, Search } from 'lucide-react';
+import { ListTodo, Plus, Loader2, ChevronRight, Bug, BookOpen, CheckSquare, Zap, Search, Sparkles } from 'lucide-react';
 import { filterIssuesJQL } from '../../utils/jql';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import CreateIssueModal from '../board/CreateIssueModal';
+import AISprintPlannerModal from '../sprint/AISprintPlannerModal';
 import { DndContext, closestCorners, PointerSensor, useSensor, useSensors, DragOverlay, defaultDropAnimationSideEffects, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -35,6 +36,7 @@ const BacklogPage = () => {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [newSprintName, setNewSprintName] = useState('');
     const [showCreateSprint, setShowCreateSprint] = useState(false);
+    const [isPlannerOpen, setIsPlannerOpen] = useState(false);
     const [activeDragIssue, setActiveDragIssue] = useState(null);
     const [jqlQuery, setJqlQuery] = useState('');
 
@@ -200,6 +202,13 @@ const BacklogPage = () => {
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                     <button
+                        onClick={() => setIsPlannerOpen(true)}
+                        className="flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-2.5 sm:px-3 py-2 text-sm text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 transition-colors shadow-sm"
+                    >
+                        <Sparkles size={14} />
+                        <span className="hidden sm:inline">Auto-Plan</span>
+                    </button>
+                    <button
                         onClick={() => setShowCreateSprint(!showCreateSprint)}
                         className="flex items-center gap-1.5 rounded-lg border border-v-border bg-v-primary px-2.5 sm:px-3 py-2 text-sm text-v-muted hover:bg-v-secondary transition-colors"
                     >
@@ -294,7 +303,17 @@ const BacklogPage = () => {
                 </DragOverlay>
             </DndContext>
 
-            <CreateIssueModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
+            <CreateIssueModal
+                isOpen={isCreateOpen}
+                onClose={() => setIsCreateOpen(false)}
+                projectId={projectId}
+            />
+
+            <AISprintPlannerModal
+                isOpen={isPlannerOpen}
+                onClose={() => setIsPlannerOpen(false)}
+                backlogIssues={backlogIssues}
+            />
         </div>
     );
 };

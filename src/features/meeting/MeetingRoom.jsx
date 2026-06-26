@@ -12,7 +12,7 @@ export const MeetingRoom = () => {
 
   const [meeting, setMeeting] = useState(null);
   const [transcript, setTranscript] = useState('');
-  const [interimTranscript, setInterimTranscript] = useState('');
+  const [interimText, setInterimText] = useState(''); // Live "typing" display
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
 
@@ -20,6 +20,15 @@ export const MeetingRoom = () => {
   const recognitionRef = useRef(null);
   const transcriptSegmentsRef = useRef([]);
   const zpRef = useRef(null);
+  const isRecognitionActiveRef = useRef(false); // Tracks active state to prevent double-start
+  const transcriptBodyRef = useRef(null);
+
+  // Auto-scroll when new transcript added
+  useEffect(() => {
+    if (transcriptBodyRef.current) {
+      transcriptBodyRef.current.scrollTop = transcriptBodyRef.current.scrollHeight;
+    }
+  }, [transcript]);
 
   // Fetch meeting data on mount
   useEffect(() => {
@@ -109,10 +118,13 @@ export const MeetingRoom = () => {
           scenario: {
               mode: ZegoUIKitPrebuilt.VideoConference,
           },
+          showLeaveRoomConfirmDialog: false,
+          showLeavingView: false,
+          onLeaveRoom: handleMeetingEnd,
           showScreenSharingButton: true,
-          onLeaveRoom: () => {
-              endMeeting();
-          }
+          maxUsers: 20,
+          layout: 'Grid',
+          showUserNameOnView: true,
       });
   };
 
@@ -127,96 +139,95 @@ export const MeetingRoom = () => {
       setTranscript(prev => prev + '\n' + data.userName + ': ' + data.text);
   };
 
+  const mediaRecorderRef = useRef(null);
+
   // Transcription
-  const startTranscription = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      console.warn('Speech Recognition not supported in this browser. Please use Chrome for transcriptions.');
-      return;
-    }
-
-    recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true;
-    recognitionRef.current.language = 'en-US';
-
-    recognitionRef.current.onstart = () => {
-      setIsTranscribing(true);
-    };
-
-    recognitionRef.current.onresult = (event) => {
-      let currentInterim = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const resultText = event.results[i][0].transcript;
-
-        if (event.results[i].isFinal) {
-          transcriptSegmentsRef.current.push({
-            timestamp: new Date(),
-            speakerId: user?._id,
-            speakerName: user?.name,
-            text: resultText,
-            duration: 0
-          });
-
-          socket.emit('transcript-segment', {
-            meetingId,
-            userId: user?._id,
-            userName: user?.name,
-            text: resultText,
-            timestamp: new Date()
-          });
-
-          setTranscript(prev => prev + '\nMe: ' + resultText);
-        } else {
-          currentInterim += resultText;
-        }
-      }
-      setInterimTranscript(currentInterim);
-    };
-
-    recognitionRef.current.onerror = (event) => {
-      if (event.error === 'aborted' || event.error === 'no-speech') return;
-      console.warn('Speech recognition error:', event.error);
-    };
-
-    recognitionRef.current.onend = () => {
-      // Auto-restart if we didn't deliberately stop it
-      if (recognitionRef.current && !isEnding) {
-          try {
-              recognitionRef.current.start();
-          } catch(e) {}
-      } else {
-        setIsTranscribing(false);
-      }
-    };
-
+  const startTranscription = async () => {
     try {
-        recognitionRef.current.start();
-    } catch(e) {}
-  };
+      // We explicitly request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Use webm for browser compatibility (Chrome/Firefox)
+      const options = MediaRecorder.isTypeSupported('audio/webm') ? { mimeType: 'audio/webm' } : {};
+      const mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = mediaRecorder;
 
-  // End meeting
-  const endMeeting = async () => {
+      mediaRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0 && !isEnding) {
+          const formData = new FormData();
+          formData.append('audio', event.data, 'chunk.webm');
+          
+          try {
+            const res = await axios.post('/ai/transcribe', formData, {
+               headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
+            if (res.data.text && res.data.text.trim()) {
+              const text = res.data.text.trim();
+              
+              transcriptSegmentsRef.current.push({
+                timestamp: new Date(),
+                speakerId: user._id,
+                speakerName: user.name,
+                text: text,
+                duration: 0
+              });
+
+              socket.emit('transcript-segment', {
+                meetingId,
+                userId: user._id,
+                userName: user.name,
+                text: text,
+                timestamp: new Date()
+              });
+
+              setTranscript(prev => (prev ? prev + ' ' + text : text));
+            }
+          } catch (err) {
+            console.error('Transcription API Error:', err);
+          }
+        }
+      };
+
+      // Send chunks every 5 seconds to the backend
+      mediaRecorder.start(5000); 
+      setIsTranscribing(true);
+    } catch (err) {
+      console.error('Microphone access denied or error:', err);
+    }
+  };
+  // ✅ NEW: Handles full meeting end flow
+  const handleMeetingEnd = async () => {
+    // Prevent double-trigger
     if (isEnding) return;
     setIsEnding(true);
 
     try {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-        recognitionRef.current = null;
+      // Step 1: Stop media recorder cleanly
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       }
 
+      // Step 2: Give recognition 500ms to flush final segment
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Step 3: Collect all attendee IDs
+      const attendeeIds = [user._id];
+
+      // Step 4: Send transcript + end meeting to backend
       await axios.post(`/meetings/${meetingId}/end`, {
         transcriptSegments: transcriptSegmentsRef.current,
-        attendeeIds: user ? [user._id] : [] // Zegocloud handles its own participant list, we'll just log ourselves, or could fetch from Zego if needed
+        attendeeIds: attendeeIds
       });
 
+      // Step 5: Navigate to MOM preview page
       navigate(`/meetings/${meetingId}/mom`);
+
     } catch (error) {
       console.error('Error ending meeting:', error);
-      alert('Failed to end meeting');
-      setIsEnding(false);
+      // Still navigate even on error — MOM can be generated from partial transcript
+      navigate(`/meetings/${meetingId}/mom`);
     }
   };
 
@@ -260,27 +271,38 @@ export const MeetingRoom = () => {
       </div>
 
       {/* Transcript Sidebar */}
-      <div className="w-80 bg-v-secondary border-l border-v-border flex flex-col">
-        <div className="p-4 border-b border-v-border flex justify-between items-center bg-v-primary">
-            <h3 className="font-semibold text-v-text flex items-center gap-2">
-                Live Transcript
-            </h3>
-            {isTranscribing && (
-                <span className="flex items-center gap-1 text-xs text-blue-400 font-medium bg-blue-400/10 px-2 py-1 rounded">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-                    Listening
-                </span>
-            )}
+      <div className="w-80 bg-v-secondary border-l border-v-border flex flex-col relative">
+        <div className="participant-badge absolute top-2 right-4 z-10 text-xs font-medium bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">
+          <span>👥 1 in meeting</span>
         </div>
-        <div className="flex-1 p-4 overflow-y-auto text-sm text-v-text space-y-3 whitespace-pre-wrap flex flex-col font-mono bg-[#1e1e1e]">
-            {transcript || (
-                <span className="text-v-muted text-center mt-10 italic">
-                    Start speaking... Transcript will appear here.
-                </span>
+
+        <div className="transcript-panel w-full h-full flex flex-col bg-v-secondary">
+          <div className="transcript-header p-4 border-b border-v-border flex justify-between items-center bg-v-primary">
+            <span className="font-semibold text-v-text flex items-center gap-2">Live Transcript</span>
+            {isTranscribing ? (
+              <span className="transcript-indicator flex items-center gap-1 text-xs text-green-400 font-medium bg-green-400/10 px-2 py-1 rounded">
+                <span className="dot w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> Listening
+              </span>
+            ) : (
+              <span className="transcript-paused flex items-center gap-1 text-xs text-yellow-500 font-medium bg-yellow-500/10 px-2 py-1 rounded">
+                ⏸ Paused
+              </span>
             )}
-            {interimTranscript && (
-                <span className="text-blue-400 italic animate-pulse">Me: {interimTranscript}</span>
+          </div>
+
+          <div className="transcript-body flex-1 p-4 overflow-y-auto text-sm text-v-text space-y-3 whitespace-pre-wrap flex flex-col font-mono bg-[#1e1e1e]" ref={transcriptBodyRef}>
+            {/* Committed (final) transcript */}
+            <span className="transcript-final">
+              {transcript || 'Waiting for speech...'}
+            </span>
+
+            {/* Live interim (currently being spoken) — italic & dimmed */}
+            {interimText && (
+              <span className="transcript-interim text-gray-400 italic">
+                {' '}{interimText}
+              </span>
             )}
+          </div>
         </div>
       </div>
     </div>

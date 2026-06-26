@@ -9,7 +9,7 @@ import { socket } from '../utils/socket';
 import {
     LogOut, User as UserIcon, LayoutDashboard, Layers, BookOpen,
     Zap, ChevronDown, ChevronRight, Menu, X, Users, Settings, Bell, BarChart2,
-    Sun, Moon, MessageSquare, Rocket, Video
+    Sun, Moon, MessageSquare, Rocket, Video, Calendar, Shield, Activity
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
@@ -17,6 +17,8 @@ import ChatSidebar from '../features/chat/ChatSidebar';
 import ChatWindow from '../features/chat/ChatWindow';
 import { clearActiveConversation } from '../features/chat/chatSlice';
 import AIChatAssistant from '../components/ai/AIChatAssistant';
+import { CommandPalette } from '../components/CommandPalette';
+import { KeyboardShortcuts } from '../components/KeyboardShortcuts';
 
 
 const NavLink = ({ to, active, icon, label, collapsed }) => (
@@ -115,6 +117,9 @@ const DashboardLayout = () => {
         if (location.pathname.includes('/sprints')) return 'Sprints';
         if (location.pathname.includes('/settings')) return 'Settings';
         if (location.pathname.includes('/members')) return 'Members';
+        if (location.pathname.includes('/roles')) return 'Roles';
+        if (location.pathname.includes('/audit-logs')) return 'Audit Logs';
+        if (location.pathname === '/settings') return 'Settings';
         return 'TaskFlow';
     };
 
@@ -144,8 +149,11 @@ const DashboardLayout = () => {
                 <NavLink to="/projects" active={isActive('/projects')} icon={<Layers size={18} />} label="Projects" collapsed={collapsed} />
                 <NavLink to="/meetings" active={isActive('/meetings')} icon={<Video size={18} />} label="Meetings" collapsed={collapsed} />
                 <NavLink to="/members" active={isPathActive('/members')} icon={<Users size={18} />} label="Members" collapsed={collapsed} />
+                <NavLink to="/roles" active={isActive('/roles')} icon={<Shield size={18} />} label="Roles" collapsed={collapsed} />
+                <NavLink to="/audit-logs" active={isActive('/audit-logs')} icon={<Activity size={18} />} label="Audit Logs" collapsed={collapsed} />
                 <NavLink to="/billing" active={isActive('/billing')} icon={<Zap size={18} />} label="Billing" collapsed={collapsed} />
                 <NavLink to="/pricing" active={isActive('/pricing')} icon={<Rocket size={18} />} label="Upgrade" collapsed={collapsed} />
+                <NavLink to="/settings" active={isActive('/settings')} icon={<Settings size={18} />} label="Settings" collapsed={collapsed} />
 
                 {!collapsed && (
                     <div className="pt-3 pb-1">
@@ -176,8 +184,10 @@ const DashboardLayout = () => {
                         {!collapsed && expandedProjects[project._id] && (
                             <div className="ml-8 mt-1 space-y-1">
                                 <SubLink to={`/project/${project._id}/board`} active={isActive(`/project/${project._id}/board`)} icon={<Layers size={14} />} label="Board" />
+                                <SubLink to={`/project/${project._id}/timeline`} active={isActive(`/project/${project._id}/timeline`)} icon={<Calendar size={14} />} label="Timeline" />
                                 <SubLink to={`/project/${project._id}/backlog`} active={isActive(`/project/${project._id}/backlog`)} icon={<BookOpen size={14} />} label="Backlog" />
                                 <SubLink to={`/project/${project._id}/sprints`} active={isActive(`/project/${project._id}/sprints`)} icon={<Zap size={14} />} label="Sprints" />
+                                <SubLink to={`/project/${project._id}/workload`} active={isActive(`/project/${project._id}/workload`)} icon={<Users size={14} />} label="Workload" />
                                 <SubLink to={`/project/${project._id}/reports`} active={isActive(`/project/${project._id}/reports`)} icon={<BarChart2 size={14} />} label="Reports" />
                                 {isAdminOrPM && (
                                     <SubLink to={`/project/${project._id}/settings`} active={isActive(`/project/${project._id}/settings`)} icon={<Settings size={14} />} label="Settings" />
@@ -245,8 +255,11 @@ const DashboardLayout = () => {
                     <NavLink to="/projects" active={isActive('/projects')} icon={<Layers size={18} />} label="Projects" collapsed={false} />
                     <NavLink to="/meetings" active={isActive('/meetings')} icon={<Video size={18} />} label="Meetings" collapsed={false} />
                     <NavLink to="/members" active={isPathActive('/members')} icon={<Users size={18} />} label="Members" collapsed={false} />
+                    <NavLink to="/roles" active={isActive('/roles')} icon={<Shield size={18} />} label="Roles" collapsed={false} />
+                    <NavLink to="/audit-logs" active={isActive('/audit-logs')} icon={<Activity size={18} />} label="Audit Logs" collapsed={false} />
                     <NavLink to="/billing" active={isActive('/billing')} icon={<Zap size={18} />} label="Billing" collapsed={false} />
                     <NavLink to="/pricing" active={isActive('/pricing')} icon={<Rocket size={18} />} label="Upgrade" collapsed={false} />
+                    <NavLink to="/settings" active={isActive('/settings')} icon={<Settings size={18} />} label="Settings" collapsed={false} />
 
                     <div className="pt-3 pb-1">
                         <p className="px-3 text-[11px] font-semibold text-v-muted/40 uppercase tracking-widest">Projects</p>
@@ -267,8 +280,10 @@ const DashboardLayout = () => {
                             {expandedProjects[project._id] && (
                                 <div className="ml-8 mt-1 space-y-1">
                                     <SubLink to={`/project/${project._id}/board`} active={isActive(`/project/${project._id}/board`)} icon={<Layers size={14} />} label="Board" />
+                                    <SubLink to={`/project/${project._id}/timeline`} active={isActive(`/project/${project._id}/timeline`)} icon={<Calendar size={14} />} label="Timeline" />
                                     <SubLink to={`/project/${project._id}/backlog`} active={isActive(`/project/${project._id}/backlog`)} icon={<BookOpen size={14} />} label="Backlog" />
                                     <SubLink to={`/project/${project._id}/sprints`} active={isActive(`/project/${project._id}/sprints`)} icon={<Zap size={14} />} label="Sprints" />
+                                    <SubLink to={`/project/${project._id}/workload`} active={isActive(`/project/${project._id}/workload`)} icon={<Users size={14} />} label="Workload" />
                                     <SubLink to={`/project/${project._id}/reports`} active={isActive(`/project/${project._id}/reports`)} icon={<BarChart2 size={14} />} label="Reports" />
                                     {isAdminOrPM && (
                                         <SubLink to={`/project/${project._id}/settings`} active={isActive(`/project/${project._id}/settings`)} icon={<Settings size={14} />} label="Settings" />
@@ -465,6 +480,9 @@ const DashboardLayout = () => {
                     </div>
                 </div>
             </div>
+
+            <CommandPalette />
+            <KeyboardShortcuts />
         </div>
     );
 };

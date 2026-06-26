@@ -299,7 +299,11 @@ const IssueModal = ({ isOpen, onClose, issue }) => {
                         )}
                     </div>
                 </div>
-                <p className="text-sm text-v-muted leading-relaxed">{comment.content}</p>
+                <p className="text-sm text-v-muted leading-relaxed">
+                    {comment.content.split(/(@\w+)/g).map((part, i) => 
+                        part.startsWith('@') ? <span key={i} className="text-blue-500 font-semibold bg-blue-500/10 px-1 rounded">{part}</span> : part
+                    )}
+                </p>
             </div>
         </div>
     );

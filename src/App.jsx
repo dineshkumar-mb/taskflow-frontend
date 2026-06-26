@@ -21,8 +21,13 @@ const BoardPage = lazy(() => import('./features/board/BoardPage'));
 const BacklogPage = lazy(() => import('./features/backlog/BacklogPage'));
 const SprintPage = lazy(() => import('./features/sprint/SprintPage'));
 const ReportsPage = lazy(() => import('./features/report/ReportsPage'));
+const TimelinePage = lazy(() => import('./features/board/TimelinePage'));
 const MembersPage = lazy(() => import('./features/members/MembersPage'));
+const WorkloadPage = lazy(() => import('./features/members/WorkloadPage'));
 const ProjectSettingsPage = lazy(() => import('./features/project/ProjectSettingsPage'));
+const UserSettingsPage = lazy(() => import('./features/settings/UserSettingsPage'));
+const RolesPage = lazy(() => import('./features/settings/RolesPage'));
+const AuditLogPage = lazy(() => import('./features/settings/AuditLogPage'));
 const GlobalMeetingsPage = lazy(() => import('./features/meeting/GlobalMeetingsPage').then(m => ({ default: m.GlobalMeetingsPage })));
 const MeetingRoom = lazy(() => import('./features/meeting/MeetingRoom').then(m => ({ default: m.MeetingRoom })));
 const MOMPreview = lazy(() => import('./features/meeting/MOMPreview').then(m => ({ default: m.MOMPreview })));
@@ -80,8 +85,13 @@ function App() {
             <Route path="project/:projectId/backlog" element={<BacklogPage />} />
             <Route path="project/:projectId/sprints" element={<SprintPage />} />
             <Route path="project/:projectId/reports" element={<ReportsPage />} />
+            <Route path="project/:projectId/timeline" element={<TimelinePage />} />
+            <Route path="project/:projectId/workload" element={<WorkloadPage />} />
             <Route path="project/:projectId/settings" element={<ProjectSettingsPage />} />
             <Route path="members" element={<MembersPage />} />
+            <Route path="roles" element={<RolesPage />} />
+            <Route path="audit-logs" element={<AuditLogPage />} />
+            <Route path="settings" element={<UserSettingsPage />} />
             <Route path="meetings/:meetingId/mom" element={<MOMPreview />} />
           </Route>
           

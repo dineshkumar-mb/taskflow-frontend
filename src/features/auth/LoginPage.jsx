@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { login, reset } from './authSlice';
+import { login, verify2FA, reset } from './authSlice';
 import { Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -79,6 +79,7 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showPass, setShowPass] = useState(false);
+    const [twoFactorCode, setTwoFactorCode] = useState('');
 
     // Mouse-tilt for the right panel
     const panelRef = useRef(null);
@@ -94,7 +95,7 @@ const LoginPage = () => {
     }, []);
     const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
 
-    const { user, isLoading, isError, isSuccess, message } = useSelector(state => state.auth);
+    const { user, isLoading, isError, isSuccess, requires2FA, tempUserId, message } = useSelector(state => state.auth);
     const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(loginSchema) });
 
     useEffect(() => {
@@ -104,6 +105,11 @@ const LoginPage = () => {
     }, [user, isError, isSuccess, message, navigate, dispatch]);
 
     const onSubmit = (data) => dispatch(login(data));
+
+    const onVerify2FA = (e) => {
+        e.preventDefault();
+        dispatch(verify2FA({ userId: tempUserId, token: twoFactorCode }));
+    };
 
     return (
         <div className="flex min-h-screen overflow-hidden bg-gray-950">
@@ -302,101 +308,152 @@ const LoginPage = () => {
                             </p>
                         </div>
 
-                        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            {/* Email */}
-                            <div>
-                                <label style={{ color: 'rgba(209,213,219,1)', fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>
-                                    Email address
-                                </label>
-                                <input
-                                    type="email"
-                                    placeholder="name@company.com"
-                                    {...register('email')}
-                                    style={{
-                                        width: '100%', padding: '11px 16px',
-                                        background: 'rgba(255,255,255,0.06)',
-                                        border: errors.email ? '1.5px solid rgba(239,68,68,0.7)' : '1.5px solid rgba(255,255,255,0.1)',
-                                        borderRadius: 12, color: 'white', fontSize: 14,
-                                        outline: 'none', transition: 'border-color 0.2s',
-                                        boxSizing: 'border-box',
-                                    }}
-                                    onFocus={e => (e.target.style.borderColor = 'rgba(99,102,241,0.8)')}
-                                    onBlur={e => (e.target.style.borderColor = errors.email ? 'rgba(239,68,68,0.7)' : 'rgba(255,255,255,0.1)')}
-                                />
-                                {errors.email && <p style={{ color: '#f87171', fontSize: 11, marginTop: 4 }}>{errors.email.message}</p>}
-                            </div>
-
-                            {/* Password */}
-                            <div>
-                                <label style={{ color: 'rgba(209,213,219,1)', fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>
-                                    Password
-                                </label>
-                                <div style={{ position: 'relative' }}>
+                        {!requires2FA ? (
+                            <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                {/* Email */}
+                                <div>
+                                    <label style={{ color: 'rgba(209,213,219,1)', fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>
+                                        Email address
+                                    </label>
                                     <input
-                                        type={showPass ? 'text' : 'password'}
-                                        placeholder="••••••••"
-                                        {...register('password')}
+                                        type="email"
+                                        placeholder="name@company.com"
+                                        {...register('email')}
                                         style={{
-                                            width: '100%', padding: '11px 50px 11px 16px',
+                                            width: '100%', padding: '11px 16px',
                                             background: 'rgba(255,255,255,0.06)',
-                                            border: errors.password ? '1.5px solid rgba(239,68,68,0.7)' : '1.5px solid rgba(255,255,255,0.1)',
+                                            border: errors.email ? '1.5px solid rgba(239,68,68,0.7)' : '1.5px solid rgba(255,255,255,0.1)',
                                             borderRadius: 12, color: 'white', fontSize: 14,
                                             outline: 'none', transition: 'border-color 0.2s',
                                             boxSizing: 'border-box',
                                         }}
                                         onFocus={e => (e.target.style.borderColor = 'rgba(99,102,241,0.8)')}
-                                        onBlur={e => (e.target.style.borderColor = errors.password ? 'rgba(239,68,68,0.7)' : 'rgba(255,255,255,0.1)')}
+                                        onBlur={e => (e.target.style.borderColor = errors.email ? 'rgba(239,68,68,0.7)' : 'rgba(255,255,255,0.1)')}
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPass(v => !v)}
+                                    {errors.email && <p style={{ color: '#f87171', fontSize: 11, marginTop: 4 }}>{errors.email.message}</p>}
+                                </div>
+
+                                {/* Password */}
+                                <div>
+                                    <label style={{ color: 'rgba(209,213,219,1)', fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>
+                                        Password
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type={showPass ? 'text' : 'password'}
+                                            placeholder="••••••••"
+                                            {...register('password')}
+                                            style={{
+                                                width: '100%', padding: '11px 50px 11px 16px',
+                                                background: 'rgba(255,255,255,0.06)',
+                                                border: errors.password ? '1.5px solid rgba(239,68,68,0.7)' : '1.5px solid rgba(255,255,255,0.1)',
+                                                borderRadius: 12, color: 'white', fontSize: 14,
+                                                outline: 'none', transition: 'border-color 0.2s',
+                                                boxSizing: 'border-box',
+                                            }}
+                                            onFocus={e => (e.target.style.borderColor = 'rgba(99,102,241,0.8)')}
+                                            onBlur={e => (e.target.style.borderColor = errors.password ? 'rgba(239,68,68,0.7)' : 'rgba(255,255,255,0.1)')}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPass(v => !v)}
+                                            style={{
+                                                position: 'absolute', right: 14, top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                color: 'rgba(156,163,175,1)', fontSize: 11, fontWeight: 600,
+                                                background: 'none', border: 'none', cursor: 'pointer',
+                                            }}
+                                        >
+                                            {showPass ? 'Hide' : 'Show'}
+                                        </button>
+                                    </div>
+                                    {errors.password && <p style={{ color: '#f87171', fontSize: 11, marginTop: 4 }}>{errors.password.message}</p>}
+                                    <div style={{ textAlign: 'right', marginTop: 8 }}>
+                                        <Link to="/forgot-password" style={{ color: '#818cf8', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
+                                            Forgot password?
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                {/* Submit */}
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    style={{
+                                        marginTop: 4,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                        padding: '13px 20px',
+                                        background: isLoading
+                                            ? 'rgba(99,102,241,0.6)'
+                                            : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #3b82f6 100%)',
+                                        borderRadius: 12, color: 'white', fontWeight: 700, fontSize: 14,
+                                        border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer',
+                                        boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
+                                        transition: 'all 0.2s',
+                                        transform: 'translateZ(8px)',
+                                    }}
+                                    onMouseEnter={e => !isLoading && (e.currentTarget.style.transform = 'translateZ(8px) scale(1.02)')}
+                                    onMouseLeave={e => (e.currentTarget.style.transform = 'translateZ(8px) scale(1)')}
+                                >
+                                    {isLoading ? (
+                                        <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Signing in…</>
+                                    ) : (
+                                        <>Sign in <ArrowRight size={16} /></>
+                                    )}
+                                </button>
+                            </form>
+                        ) : (
+                            <form onSubmit={onVerify2FA} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <div>
+                                    <label style={{ color: 'rgba(209,213,219,1)', fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>
+                                        Authenticator Code
+                                    </label>
+                                    <p style={{ color: 'rgba(156,163,175,1)', fontSize: 12, marginBottom: 12 }}>
+                                        Two-factor authentication is enabled for this account. Enter the 6-digit code from your authenticator app.
+                                    </p>
+                                    <input
+                                        type="text"
+                                        placeholder="000000"
+                                        value={twoFactorCode}
+                                        onChange={(e) => setTwoFactorCode(e.target.value)}
                                         style={{
-                                            position: 'absolute', right: 14, top: '50%',
-                                            transform: 'translateY(-50%)',
-                                            color: 'rgba(156,163,175,1)', fontSize: 11, fontWeight: 600,
-                                            background: 'none', border: 'none', cursor: 'pointer',
+                                            width: '100%', padding: '11px 16px',
+                                            background: 'rgba(255,255,255,0.06)',
+                                            border: '1.5px solid rgba(255,255,255,0.1)',
+                                            borderRadius: 12, color: 'white', fontSize: 18, letterSpacing: '4px', textAlign: 'center',
+                                            outline: 'none', transition: 'border-color 0.2s',
+                                            boxSizing: 'border-box',
                                         }}
-                                    >
-                                        {showPass ? 'Hide' : 'Show'}
-                                    </button>
+                                        onFocus={e => (e.target.style.borderColor = 'rgba(99,102,241,0.8)')}
+                                        onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+                                        maxLength={6}
+                                        required
+                                    />
                                 </div>
-                                {errors.password && <p style={{ color: '#f87171', fontSize: 11, marginTop: 4 }}>{errors.password.message}</p>}
-                                <div style={{ textAlign: 'right', marginTop: 8 }}>
-                                    <Link to="/forgot-password" style={{ color: '#818cf8', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>
-                                        Forgot password?
-                                    </Link>
-                                </div>
-                            </div>
-
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                style={{
-                                    marginTop: 4,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                                    padding: '13px 20px',
-                                    background: isLoading
-                                        ? 'rgba(99,102,241,0.6)'
-                                        : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #3b82f6 100%)',
-                                    borderRadius: 12, color: 'white', fontWeight: 700, fontSize: 14,
-                                    border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer',
-                                    boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
-                                    transition: 'all 0.2s',
-                                    transform: 'translateZ(8px)',
-                                }}
-                                onMouseEnter={e => !isLoading && (e.currentTarget.style.transform = 'translateZ(8px) scale(1.02)')}
-                                onMouseLeave={e => (e.currentTarget.style.transform = 'translateZ(8px) scale(1)')}
-                            >
-                                {isLoading ? (
-                                    <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Signing in…</>
-                                ) : (
-                                    <>Sign in <ArrowRight size={16} /></>
-                                )}
-                            </button>
-
-
-                        </form>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading || twoFactorCode.length < 6}
+                                    style={{
+                                        marginTop: 4,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                        padding: '13px 20px',
+                                        background: isLoading || twoFactorCode.length < 6
+                                            ? 'rgba(99,102,241,0.6)'
+                                            : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #3b82f6 100%)',
+                                        borderRadius: 12, color: 'white', fontWeight: 700, fontSize: 14,
+                                        border: 'none', cursor: isLoading || twoFactorCode.length < 6 ? 'not-allowed' : 'pointer',
+                                        boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
+                                        transition: 'all 0.2s',
+                                    }}
+                                >
+                                    {isLoading ? (
+                                        <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Verifying…</>
+                                    ) : (
+                                        <>Verify & Sign in <ArrowRight size={16} /></>
+                                    )}
+                                </button>
+                            </form>
+                        )}
 
                         {/* Free tier notice */}
                         <div style={{
