@@ -27,7 +27,13 @@ const BillingPage = () => {
         try {
             // Use /billing/checkout to get a Cashfree subscription authLink
             const res = await axiosInstance.post('/billing/checkout', { planPriceId: 'plan_pro' });
-            if (res.data.url) {
+            if (res.data.subscription_session_id) {
+                const cashfree = window.Cashfree({ mode: "sandbox" });
+                cashfree.subscriptionsCheckout({
+                    subsSessionId: res.data.subscription_session_id,
+                    redirectTarget: "_self"
+                });
+            } else if (res.data.url) {
                 window.location.href = res.data.url;
             }
         } catch (error) {
