@@ -1,16 +1,50 @@
-# React + Vite
+# TaskFlow - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React-based web interface for an AI-powered Sprint Management SaaS platform.
 
-Currently, two official plugins are available:
+## 🚀 What Was Built
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A responsive, Jira-inspired frontend application that enables teams to manage agile sprints, track issues, and orchestrate projects. It connects to a Node.js backend to provide real-time updates and integrates an AI copilot interface allowing users to create tasks and analyze project risk using natural language.
 
-## React Compiler
+## 💡 Why It's Technically Interesting
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The application seamlessly blends standard Kanban board interactions with natural language conversational commands. The UI dynamically responds to structured AI payloads, converting a single user prompt like "estimate story points for this bug" into an interactive, actionable component on the dashboard. 
 
-## Expanding the ESLint configuration
+## 🛠️ Architecture
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend Stack:** React.js, TailwindCSS (or similar styling framework).
+- **Hosting:** Vercel (Live Demo: https://taskflow-frontend-self.vercel.app/).
+- **API Integration:** Connects via REST to the Node.js backend, handling authentication and data persistence.
+- **Billing Integration:** Client-side routing to Cashfree Subscription Management portals for plan upgrades.
+
+## RBAC & Cashfree Billing Flow
+
+- **Role-Based Access Control:** The frontend dynamically renders UI elements based on the user's role (Admin, Member, Viewer). Permissions dictate whether a user can initiate billing upgrades or edit sprint configurations.
+- **Subscription Management:** Clicking "Upgrade" triggers the backend to create a Cashfree Checkout Session. Cashfree webhooks instantly notify the backend of successful payments, which the frontend polls/fetches to instantly unlock 'Pro' features (like unlimited AI Copilot usage).
+
+## Getting Started
+
+### Prerequisites
+- Node.js v22
+
+### Installation
+
+```bash
+git clone https://github.com/dineshkumar-mb/taskflow-frontend
+cd taskflow-frontend
+npm install
+```
+
+### Running the App
+
+```bash
+npm run dev
+```
+
+## Environment Variables
+
+Create a `.env` file with the necessary required keys (e.g., backend URL mapping):
+- `VITE_API_URL` (or equivalent)
+
+## License
+MIT License
