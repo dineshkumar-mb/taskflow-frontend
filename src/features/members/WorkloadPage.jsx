@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getIssues } from '../board/boardSlice';
 import { Loader2, Users } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
+import { WorkloadPageSkeleton } from '../../components/ui/Skeleton';
 
 const WorkloadPage = () => {
     const { projectId } = useParams();
@@ -76,7 +77,7 @@ const WorkloadPage = () => {
     }, [issues, orgUsers]);
 
     if (issuesLoading || usersLoading) {
-        return <div className="flex h-64 items-center justify-center"><Loader2 size={32} className="animate-spin text-blue-500" /></div>;
+        return <div className="p-6"><WorkloadPageSkeleton /></div>;
     }
 
     if (workloadData.length === 0) {

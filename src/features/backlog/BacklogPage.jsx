@@ -5,6 +5,7 @@ import { getIssues, updateIssue, moveIssueOptimistic, reorderIssues, moveIssueBe
 import { getSprints, createSprint, startSprint, completeSprint } from '../sprint/sprintSlice';
 import { toast } from 'react-toastify';
 import { ListTodo, Plus, Loader2, ChevronRight, Bug, BookOpen, CheckSquare, Zap, Search, Sparkles } from 'lucide-react';
+import { BacklogPageSkeleton } from '../../components/ui/Skeleton';
 import { filterIssuesJQL } from '../../utils/jql';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import CreateIssueModal from '../board/CreateIssueModal';
@@ -172,11 +173,7 @@ const BacklogPage = () => {
     };
 
     if (isLoading) {
-        return (
-            <div className="flex h-64 items-center justify-center">
-                <Loader2 className="animate-spin text-blue-500" size={32} />
-            </div>
-        );
+        return <div className="p-6"><BacklogPageSkeleton /></div>;
     }
 
     const futureSprints = sprints.filter(s => s.status === 'future');

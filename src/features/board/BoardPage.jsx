@@ -12,6 +12,7 @@ import CreateIssueModal from './CreateIssueModal';
 import { MeetingScheduler } from '../meeting/MeetingScheduler';
 import AIRiskPanel from '../dashboard/AIRiskPanel';
 import { Loader2, Plus, Filter, Search, Sparkles } from 'lucide-react';
+import { BoardPageSkeleton } from '../../components/ui/Skeleton';
 import { socket } from '../../utils/socket';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
@@ -213,7 +214,7 @@ const BoardPage = () => {
     const filteredIssues = getFilteredIssues();
 
     if (isLoading && !currentBoard) {
-        return <div className="flex h-full items-center justify-center"><Loader2 className="animate-spin" /></div>;
+        return <div className="p-6"><BoardPageSkeleton /></div>;
     }
 
     if (!currentBoard) return (

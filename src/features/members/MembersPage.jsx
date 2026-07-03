@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { UserPlus, Trash2, Loader2, Users, Shield, User as UserIcon } from 'lucide-react';
+import { MemberRowSkeleton } from '../../components/ui/Skeleton';
 
 const ROLE_STYLES = {
     Owner: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
@@ -170,8 +171,8 @@ const MembersPage = () => {
             {/* Members list */}
             <div className="rounded-xl bg-v-primary border border-v-main shadow-sm overflow-hidden transition-colors">
                 {isLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <Loader2 size={28} className="animate-spin text-blue-500" />
+                    <div className="divide-y divide-v-border">
+                        {[...Array(5)].map((_, i) => <MemberRowSkeleton key={i} />)}
                     </div>
                 ) : members.length === 0 ? (
                     <p className="py-12 text-center text-v-muted text-sm">No members found.</p>

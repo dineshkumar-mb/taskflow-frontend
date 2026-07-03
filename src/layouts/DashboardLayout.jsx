@@ -56,6 +56,7 @@ const DashboardLayout = () => {
 
     const userRole = typeof user?.role === 'object' ? user?.role?.name : (user?.role || user?.roleName);
     const isAdminOrPM = ['OrgOwner', 'Admin', 'SuperAdmin', 'Project Manager'].includes(userRole);
+    const isSuperAdmin = userRole === 'SuperAdmin';
 
     // Desktop: collapsed/expanded. Mobile: drawer open/closed.
     const [collapsed, setCollapsed] = useState(false);
@@ -155,6 +156,9 @@ const DashboardLayout = () => {
                 <NavLink to="/billing" active={isActive('/billing')} icon={<Zap size={18} />} label="Billing" collapsed={collapsed} />
                 <NavLink to="/pricing" active={isActive('/pricing')} icon={<Rocket size={18} />} label="Upgrade" collapsed={collapsed} />
                 <NavLink to="/settings" active={isActive('/settings')} icon={<Settings size={18} />} label="Settings" collapsed={collapsed} />
+                {isSuperAdmin && (
+                    <NavLink to="/admin-billing" active={isActive('/admin-billing')} icon={<Shield size={18} />} label="Admin Billing" collapsed={collapsed} />
+                )}
 
                 {!collapsed && (
                     <div className="pt-3 pb-1">
@@ -261,6 +265,9 @@ const DashboardLayout = () => {
                     <NavLink to="/billing" active={isActive('/billing')} icon={<Zap size={18} />} label="Billing" collapsed={false} />
                     <NavLink to="/pricing" active={isActive('/pricing')} icon={<Rocket size={18} />} label="Upgrade" collapsed={false} />
                     <NavLink to="/settings" active={isActive('/settings')} icon={<Settings size={18} />} label="Settings" collapsed={false} />
+                    {isSuperAdmin && (
+                        <NavLink to="/admin-billing" active={isActive('/admin-billing')} icon={<Shield size={18} />} label="Admin Billing" collapsed={false} />
+                    )}
 
                     <div className="pt-3 pb-1">
                         <p className="px-3 text-[11px] font-semibold text-v-muted/40 uppercase tracking-widest">Projects</p>

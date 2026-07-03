@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../../utils/axiosInstance';
 import { MeetingScheduler } from './MeetingScheduler';
 import { Video, Calendar, Clock, Users, ArrowRight } from 'lucide-react';
+import { GlobalMeetingsSkeleton } from '../../components/ui/Skeleton';
 
 export const GlobalMeetingsPage = () => {
     const [meetings, setMeetings] = useState([]);
@@ -41,7 +42,7 @@ export const GlobalMeetingsPage = () => {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-12 text-v-muted">Loading meetings...</div>
+                <GlobalMeetingsSkeleton />
             ) : meetings.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-16 bg-v-primary border border-dashed border-v-border rounded-xl">
                     <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-4">

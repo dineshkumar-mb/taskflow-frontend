@@ -45,6 +45,19 @@
     }
 }
 
+/* ── Skeleton Shimmer Utility ─────────────────────────────────────── */
+.skeleton-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--color-v-secondary) 25%,
+        var(--color-v-border)    50%,
+        var(--color-v-secondary) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+}
+
+
 @keyframes float {
 
     0%,

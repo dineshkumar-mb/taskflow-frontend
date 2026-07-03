@@ -3,13 +3,14 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIssues } from '../board/boardSlice';
 import { getSprints } from '../sprint/sprintSlice';
-import { Loader2, BarChart2, PieChart as PieChartIcon, Activity, TrendingUp } from 'lucide-react';
+import { BarChart2, PieChart as PieChartIcon, Activity, TrendingUp } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
     PieChart, Pie, Legend, LineChart, Line, CartesianGrid,
     Tooltip as RechartsTooltip
 } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+import { ReportsPageSkeleton } from '../../components/ui/Skeleton';
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
 
@@ -36,8 +37,9 @@ const ReportsPage = () => {
     }, [projectId, dispatch]);
 
     if (isLoading) {
-        return <div className="flex h-64 items-center justify-center"><Loader2 size={32} className="animate-spin text-blue-500" /></div>;
+        return <div className="p-6"><ReportsPageSkeleton /></div>;
     }
+
 
     // 1. Status Distribution
     const statusCounts = issues.reduce((acc, issue) => {

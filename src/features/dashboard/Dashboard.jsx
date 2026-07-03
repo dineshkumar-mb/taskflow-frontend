@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import { motion } from 'framer-motion';
+import { DashboardSkeleton } from '../../components/ui/Skeleton';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -67,8 +68,9 @@ const Dashboard = () => {
         document.body.removeChild(link);
     };
 
-    if (loading) return <div className="p-8">Loading Dashboard...</div>;
+    if (loading) return <div className="p-8"><DashboardSkeleton /></div>;
     if (!stats) return <div className="p-8 text-red-500">Failed to load dashboard data.</div>;
+
 
     // ── Transform statusByProject into Recharts grouped bar format ────────────
     // Shape: [{ status: "todo", "IDE Project": 1, "Demo Project": 2 }, ...]

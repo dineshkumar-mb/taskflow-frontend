@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CreditCard, ExternalLink, ShieldCheck, Loader2, Activity } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import UsageBar from './UsageBar';
+import { BillingPageSkeleton } from '../../components/ui/Skeleton';
 
 const BillingPage = () => {
     const [loading, setLoading] = useState(false);
@@ -83,9 +84,7 @@ const BillingPage = () => {
             </div>
 
             {usageLoading ? (
-                <div className="flex justify-center py-8">
-                    <Loader2 size={24} className="animate-spin text-blue-500" />
-                </div>
+                <BillingPageSkeleton />
             ) : usage ? (
                 <div className="bg-v-primary rounded-2xl shadow-sm border border-v-border p-8 mb-8 transition-colors">
                     <div className="flex items-center gap-2 mb-6">

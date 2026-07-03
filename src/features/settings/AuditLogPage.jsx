@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { Activity, Search, Filter, Loader2, ChevronLeft, ChevronRight, ShieldAlert } from 'lucide-react';
+import { AuditLogSkeleton } from '../../components/ui/Skeleton';
 import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
 
@@ -111,8 +112,8 @@ const AuditLogPage = () => {
                             <tbody className="divide-y divide-v-border">
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan="5" className="px-4 py-8 text-center">
-                                            <Loader2 size={24} className="animate-spin text-indigo-500 mx-auto" />
+                                        <td colSpan="5" className="p-0">
+                                            <AuditLogSkeleton />
                                         </td>
                                     </tr>
                                 ) : logs.length === 0 ? (

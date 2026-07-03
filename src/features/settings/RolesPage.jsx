@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
 import { Shield, Plus, Edit2, Trash2, Check, X, ShieldAlert, Loader2 } from 'lucide-react';
+import { RolesPageSkeleton } from '../../components/ui/Skeleton';
 import { useSelector } from 'react-redux';
 
 const AVAILABLE_PERMISSIONS = [
@@ -204,8 +205,8 @@ const RolesPage = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {isLoading ? (
-                            <div className="col-span-full flex justify-center py-12">
-                                <Loader2 size={24} className="animate-spin text-blue-500" />
+                            <div className="col-span-full">
+                                <RolesPageSkeleton />
                             </div>
                         ) : roles.length > 0 ? (
                             roles.map(role => (

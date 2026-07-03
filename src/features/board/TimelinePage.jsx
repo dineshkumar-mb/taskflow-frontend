@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIssues } from './boardSlice';
 import { Loader2, Calendar } from 'lucide-react';
+import { TimelinePageSkeleton } from '../../components/ui/Skeleton';
 import { format, differenceInDays, addDays, startOfWeek, endOfWeek } from 'date-fns';
 
 const TimelinePage = () => {
@@ -30,7 +31,7 @@ const TimelinePage = () => {
     }, [issues]);
 
     if (isLoading) {
-        return <div className="flex h-64 items-center justify-center"><Loader2 size={32} className="animate-spin text-blue-500" /></div>;
+        return <div className="p-6"><TimelinePageSkeleton /></div>;
     }
 
     if (timelineData.length === 0) {

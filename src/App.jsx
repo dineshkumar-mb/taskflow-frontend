@@ -28,6 +28,7 @@ const ProjectSettingsPage = lazy(() => import('./features/project/ProjectSetting
 const UserSettingsPage = lazy(() => import('./features/settings/UserSettingsPage'));
 const RolesPage = lazy(() => import('./features/settings/RolesPage'));
 const AuditLogPage = lazy(() => import('./features/settings/AuditLogPage'));
+const AdminBillingPage = lazy(() => import('./features/billing/AdminBillingPage'));
 const GlobalMeetingsPage = lazy(() => import('./features/meeting/GlobalMeetingsPage').then(m => ({ default: m.GlobalMeetingsPage })));
 const MeetingRoom = lazy(() => import('./features/meeting/MeetingRoom').then(m => ({ default: m.MeetingRoom })));
 const MOMPreview = lazy(() => import('./features/meeting/MOMPreview').then(m => ({ default: m.MOMPreview })));
@@ -92,6 +93,7 @@ function App() {
             <Route path="roles" element={<RolesPage />} />
             <Route path="audit-logs" element={<AuditLogPage />} />
             <Route path="settings" element={<UserSettingsPage />} />
+            <Route path="admin-billing" element={<AdminBillingPage />} />
             <Route path="meetings/:meetingId/mom" element={<MOMPreview />} />
           </Route>
           
