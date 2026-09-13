@@ -107,7 +107,10 @@ export const MOMPreview = () => {
           </button>
 
           <button
-            onClick={() => navigate(`/projects/${meeting?.projectId}`)}
+            onClick={() => {
+              const pid = meeting?.projectId?._id || meeting?.projectId || '';
+              navigate(pid ? `/projects/${pid}` : '/dashboard');
+            }}
             className="px-4 py-2 bg-v-secondary hover:bg-v-border text-v-text rounded transition-colors"
           >
             Skip & Go to Project
@@ -129,11 +132,30 @@ export const MOMPreview = () => {
         <p className="text-v-muted">The meeting transcript was empty. MOM could not be generated.</p>
         <button 
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-          onClick={() => navigate(`/projects/${meeting?.projectId}`)}>
+          onClick={() => {
+            const pid = meeting?.projectId?._id || meeting?.projectId || '';
+            navigate(pid ? `/projects/${pid}` : '/dashboard');
+          }}>
           Go to Project
         </button>
       </div>
     );
+  }
+
+  const participantsList = [];
+  if (meeting?.participantIds && Array.isArray(meeting.participantIds)) {
+    meeting.participantIds.forEach(p => {
+      if (p && (p._id || p.id)) {
+        participantsList.push({ id: (p._id || p.id).toString(), name: p.name || 'Participant' });
+      }
+    });
+  }
+  if (meeting?.hostId) {
+    const hostId = (meeting.hostId._id || meeting.hostId).toString();
+    const hostName = meeting.hostId.name || 'Host';
+    if (!participantsList.some(p => p.id === hostId)) {
+      participantsList.push({ id: hostId, name: `${hostName} (Host)` });
+    }
   }
 
   return (
@@ -229,20 +251,43 @@ export const MOMPreview = () => {
                                 />
                               </div>
 
-                              {/* Assignee - editable */}
+                              {/* Assignee - editable dropdown / fallback */}
                               <div className="flex items-center gap-2 text-v-muted">
                                 <User size={14} className="flex-shrink-0"/>
-                                <input
-                                  type="text"
-                                  value={item.assigneeName || ''}
-                                  onChange={(e) => {
-                                    const updated = [...editedMOM.actionItems];
-                                    updated[index] = { ...updated[index], assigneeName: e.target.value };
-                                    setEditedMOM({ ...editedMOM, actionItems: updated });
-                                  }}
-                                  className="w-full bg-transparent text-v-text border-b border-transparent focus:border-blue-500 focus:outline-none text-xs transition-colors pb-1"
-                                  placeholder="Assignee name..."
-                                />
+                                {participantsList.length > 0 ? (
+                                  <select
+                                    value={typeof item.assigneeId === 'object' ? item.assigneeId?._id : (item.assigneeId || '')}
+                                    onChange={(e) => {
+                                      const selectedId = e.target.value;
+                                      const selectedP = participantsList.find(p => p.id === selectedId);
+                                      const updated = [...editedMOM.actionItems];
+                                      updated[index] = {
+                                        ...updated[index],
+                                        assigneeId: selectedId,
+                                        assigneeName: selectedP ? selectedP.name : item.assigneeName
+                                      };
+                                      setEditedMOM({ ...editedMOM, actionItems: updated });
+                                    }}
+                                    className="w-full bg-v-background text-v-text text-xs px-2 py-1.5 rounded-md border border-v-border focus:outline-none focus:border-blue-500 cursor-pointer"
+                                  >
+                                    <option value="">Select Assignee...</option>
+                                    {participantsList.map(p => (
+                                      <option key={p.id} value={p.id}>{p.name}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <input
+                                    type="text"
+                                    value={item.assigneeName || ''}
+                                    onChange={(e) => {
+                                      const updated = [...editedMOM.actionItems];
+                                      updated[index] = { ...updated[index], assigneeName: e.target.value };
+                                      setEditedMOM({ ...editedMOM, actionItems: updated });
+                                    }}
+                                    className="w-full bg-transparent text-v-text border-b border-transparent focus:border-blue-500 focus:outline-none text-xs transition-colors pb-1"
+                                    placeholder="Assignee name..."
+                                  />
+                                )}
                               </div>
 
                               {/* Description - editable */}
