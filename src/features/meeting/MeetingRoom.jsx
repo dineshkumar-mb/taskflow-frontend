@@ -127,8 +127,9 @@ export const MeetingRoom = () => {
       const rawAppID = import.meta.env.VITE_ZEGO_APP_ID;
       const serverSecret = (import.meta.env.VITE_ZEGO_SERVER_SECRET || '').trim();
       
-      if (!rawAppID || rawAppID === '1861654306' || !serverSecret || serverSecret === 'b61e7733c8b28eb1bffa89eb0a297f4d') {
-          console.log("[MeetingRoom] Sample ZEGOCLOUD key detected. Activating TaskFlow WebRTC Video Engine...");
+      // Fallback to built-in WebRTC engine if credentials are not provided
+      if (!rawAppID || rawAppID === '1861654306' || !serverSecret) {
+          console.log("[MeetingRoom] No external video credentials configured. Activating TaskFlow WebRTC Video Engine...");
           startFallbackVideo();
           return;
       }

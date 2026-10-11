@@ -74,6 +74,7 @@ const CouponBadge = ({ coupon, selected, onClick }) => {
 const PricingPage = () => {
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+    const [currentOrgPlan, setCurrentOrgPlan] = useState('free');
 
     // Coupon state
     const [activeCoupons, setActiveCoupons] = useState([]);
@@ -83,6 +84,17 @@ const PricingPage = () => {
     const [verifyingCoupon, setVerifyingCoupon] = useState(false);
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+    // Fetch current organization plan on mount
+    useEffect(() => {
+        axiosInstance.get('/billing/usage')
+            .then(res => {
+                if (res.data?.plan) {
+                    setCurrentOrgPlan(res.data.plan.toLowerCase());
+                }
+            })
+            .catch(err => console.error('Could not load current plan:', err));
+    }, []);
 
     // Fetch active coupons whenever the modal opens
     useEffect(() => {
@@ -103,7 +115,8 @@ const PricingPage = () => {
     }, [showCheckoutModal]);
 
     const handleSelectPlan = (plan) => {
-        if (plan.current || !plan.priceId) return;
+        const isCurrent = plan.name.toLowerCase() === currentOrgPlan;
+        if (isCurrent || !plan.priceId) return;
         setSelectedPlan(plan);
         setCouponCode('');
         setAppliedCoupon(null);
@@ -148,18 +161,38 @@ const PricingPage = () => {
                 couponCode: appliedCoupon ? appliedCoupon.code : null
             });
 
+            const cashfreeMode = import.meta.env.VITE_CASHFREE_MODE || (import.meta.env.MODE === 'production' ? 'production' : 'sandbox');
+
             if (res.data.payment_session_id) {
-                const cashfree = window.Cashfree({ mode: 'sandbox' });
-                cashfree.checkout({
-                    paymentSessionId: res.data.payment_session_id,
-                    redirectTarget: '_self'
-                });
+                if (typeof window.Cashfree === 'function') {
+                    const cashfree = window.Cashfree({ mode: cashfreeMode });
+                    cashfree.checkout({
+                        paymentSessionId: res.data.payment_session_id,
+                        redirectTarget: '_modal'
+                    }).then((result) => {
+                        if (result.error) {
+                            console.log('Payment modal closed or failed:', result.error);
+                        }
+                        if (result.redirect) {
+                            console.log('Payment redirection triggered');
+                        }
+                        if (result.paymentDetails) {
+                            toast.success(`Payment successful! Welcome to ${selectedPlan.name} plan.`);
+                            setShowCheckoutModal(false);
+                            window.location.href = `/billing?order_id=${res.data.order_id}`;
+                        }
+                    });
+                } else {
+                    toast.error('Payment gateway is loading. Please try again.');
+                }
             } else if (res.data.subscription_session_id) {
-                const cashfree = window.Cashfree({ mode: 'sandbox' });
-                cashfree.subscriptionsCheckout({
-                    subsSessionId: res.data.subscription_session_id,
-                    redirectTarget: '_self'
-                });
+                if (typeof window.Cashfree === 'function') {
+                    const cashfree = window.Cashfree({ mode: cashfreeMode });
+                    cashfree.subscriptionsCheckout({
+                        subsSessionId: res.data.subscription_session_id,
+                        redirectTarget: '_modal'
+                    });
+                }
             } else if (res.data.url) {
                 window.location.href = res.data.url;
             }
@@ -214,43 +247,57 @@ const PricingPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {plans.map((plan) => (
-                        <div
-                            key={plan.name}
-                            className={`bg-v-primary rounded-2xl shadow-xl p-8 border transition-all duration-200 ${
-                                plan.popular
-                                    ? 'border-indigo-500 ring-2 ring-indigo-500/20 scale-105 shadow-indigo-500/10'
-                                    : 'border-v-border hover:shadow-2xl hover:border-v-border/80'
-                            }`}
-                        >
-                            {plan.popular && (
-                                <span className="inline-block px-4 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-xs font-bold uppercase tracking-wider mb-4 border border-indigo-500/20">
-                                    Most Popular
-                                </span>
-                            )}
-                            <div className="flex items-center gap-3 mb-4">
-                                <plan.icon className={plan.popular ? 'text-indigo-500' : 'text-v-muted'} size={28} />
-                                <h2 className="text-2xl font-bold text-v-main">{plan.name}</h2>
-                            </div>
-                            <p className="text-v-muted mb-6">{plan.description}</p>
-                            <div className="flex items-baseline gap-1 mb-8">
-                                <span className="text-4xl font-extrabold text-v-main font-mono tabular-nums">{plan.price}</span>
-                                <span className="text-v-muted">/month</span>
-                            </div>
+                    {plans.map((plan) => {
+                        const isCurrent = plan.name.toLowerCase() === currentOrgPlan;
+                        const buttonLabel = isCurrent
+                            ? 'Current Plan'
+                            : plan.priceId
+                                ? `Upgrade to ${plan.name}`
+                                : 'Default Plan';
 
-                            <button
-                                onClick={() => handleSelectPlan(plan)}
-                                disabled={plan.current || !plan.priceId}
-                                className={`w-full py-3 px-6 rounded-xl font-bold text-center transition-all ${
-                                    plan.current
-                                        ? 'bg-v-secondary text-v-muted cursor-default'
+                        return (
+                            <div
+                                key={plan.name}
+                                className={`bg-v-primary rounded-2xl shadow-xl p-8 border transition-all duration-200 ${
+                                    isCurrent
+                                        ? 'border-emerald-500/50 ring-2 ring-emerald-500/20'
                                         : plan.popular
-                                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 active:scale-95'
-                                            : 'bg-transparent border-2 border-indigo-600 text-indigo-500 hover:bg-indigo-500/10 active:scale-95'
+                                            ? 'border-indigo-500 ring-2 ring-indigo-500/20 scale-105 shadow-indigo-500/10'
+                                            : 'border-v-border hover:shadow-2xl hover:border-v-border/80'
                                 }`}
                             >
-                                {plan.buttonText}
-                            </button>
+                                {isCurrent ? (
+                                    <span className="inline-block px-4 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-500/20">
+                                        Active Plan
+                                    </span>
+                                ) : plan.popular ? (
+                                    <span className="inline-block px-4 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-xs font-bold uppercase tracking-wider mb-4 border border-indigo-500/20">
+                                        Most Popular
+                                    </span>
+                                ) : null}
+                                <div className="flex items-center gap-3 mb-4">
+                                    <plan.icon className={isCurrent ? 'text-emerald-500' : plan.popular ? 'text-indigo-500' : 'text-v-muted'} size={28} />
+                                    <h2 className="text-2xl font-bold text-v-main">{plan.name}</h2>
+                                </div>
+                                <p className="text-v-muted mb-6">{plan.description}</p>
+                                <div className="flex items-baseline gap-1 mb-8">
+                                    <span className="text-4xl font-extrabold text-v-main font-mono tabular-nums">{plan.price}</span>
+                                    <span className="text-v-muted">/month</span>
+                                </div>
+
+                                <button
+                                    onClick={() => handleSelectPlan(plan)}
+                                    disabled={isCurrent || !plan.priceId}
+                                    className={`w-full py-3 px-6 rounded-xl font-bold text-center transition-all ${
+                                        isCurrent
+                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default'
+                                            : plan.popular
+                                                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 active:scale-95'
+                                                : 'bg-transparent border-2 border-indigo-600 text-indigo-500 hover:bg-indigo-500/10 active:scale-95'
+                                    }`}
+                                >
+                                    {buttonLabel}
+                                </button>
 
                             <ul className="mt-8 space-y-4">
                                 {plan.features.map((feature) => (
@@ -259,9 +306,10 @@ const PricingPage = () => {
                                         <span>{feature}</span>
                                     </li>
                                 ))}
-                            </ul>
-                        </div>
-                    ))}
+                                </ul>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
