@@ -181,35 +181,60 @@ const AIChatAssistant = ({ projectId }) => {
         </div>
     );
 
+    // Keyboard shortcut to close with Escape
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                setIsOpen(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen]);
+
+    const QUICK_PROMPTS = [
+        'Create high priority bug for auth login',
+        'Summarize project health & risks',
+        'Estimate story points for active tasks'
+    ];
+
     return (
-        <div className="relative mb-6">
+        <div className="relative">
             {!isOpen ? (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all transform hover:scale-110"
+                    className="h-12 w-12 sm:h-13 sm:w-13 bg-gradient-to-tr from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-full flex items-center justify-center shadow-xl shadow-purple-600/30 transition-all transform hover:scale-105 active:scale-95"
                     title="Open AI Copilot"
+                    aria-label="Open AI Copilot"
                 >
-                    <Bot size={24} />
+                    <Bot size={22} />
                 </button>
             ) : (
-                <div className="bg-v-primary rounded-2xl shadow-2xl w-80 sm:w-96 flex flex-col overflow-hidden border border-v-border">
+                <div className="bg-v-primary rounded-2xl shadow-2xl w-80 sm:w-96 flex flex-col overflow-hidden border border-v-border animate-in slide-in-from-bottom duration-200">
                     {/* Header */}
-                    <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
-                        <div className="flex items-center gap-2 font-semibold">
-                            <Bot size={20} />
-                            <span>AI Copilot</span>
+                    <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-3.5 text-white flex justify-between items-center shadow-sm">
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                            <div className="h-6 w-6 rounded-lg bg-white/20 flex items-center justify-center">
+                                <Bot size={15} />
+                            </div>
+                            <span>AI Project Copilot</span>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="hover:opacity-75 transition-opacity">
-                            <X size={20} />
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="p-1 rounded-lg hover:bg-white/20 transition-colors"
+                            title="Close AI Copilot"
+                            aria-label="Close AI Copilot"
+                        >
+                            <X size={16} />
                         </button>
                     </div>
 
                     {/* Chat window */}
-                    <div className="h-96 overflow-y-auto p-4 flex flex-col gap-3 bg-v-secondary/50">
+                    <div className="h-96 overflow-y-auto p-3.5 flex flex-col gap-3 bg-v-secondary/40">
                         {chat.map((msg, i) =>
                             msg.role === 'user' ? (
                                 <div key={i} className="flex justify-end">
-                                    <div className="max-w-[80%] p-3 rounded-2xl text-sm bg-blue-600 text-white rounded-br-none">
+                                    <div className="max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-br-none shadow-sm leading-relaxed">
                                         {msg.content}
                                     </div>
                                 </div>
@@ -217,11 +242,28 @@ const AIChatAssistant = ({ projectId }) => {
                                 <AIMessage key={i} msg={msg} />
                             )
                         )}
+
+                        {/* Quick Prompts when only initial message exists */}
+                        {chat.length === 1 && !loading && (
+                            <div className="flex flex-col gap-1.5 pt-1">
+                                <p className="text-[11px] font-semibold text-v-muted uppercase tracking-wider px-1">Suggested prompts:</p>
+                                {QUICK_PROMPTS.map((p, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleSendText(p)}
+                                        className="text-left text-xs bg-v-primary hover:bg-v-secondary border border-v-border hover:border-purple-500/40 text-v-main p-2 rounded-xl transition-all shadow-sm"
+                                    >
+                                        ✨ {p}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
                         {loading && (
                             <div className="flex justify-start">
-                                <div className="bg-v-primary p-3 rounded-2xl shadow-sm rounded-bl-none border border-v-border flex items-center gap-2 text-v-muted text-sm">
-                                    <Loader2 size={14} className="animate-spin" />
-                                    Thinking...
+                                <div className="bg-v-primary p-3 rounded-2xl shadow-sm rounded-bl-none border border-v-border flex items-center gap-2 text-v-muted text-xs sm:text-sm">
+                                    <Loader2 size={14} className="animate-spin text-purple-500" />
+                                    Analyzing…
                                 </div>
                             </div>
                         )}
@@ -229,22 +271,25 @@ const AIChatAssistant = ({ projectId }) => {
                     </div>
 
                     {/* Input */}
-                    <div className="p-4 bg-v-primary border-t border-v-border flex gap-2">
+                    <div className="p-3 bg-v-primary border-t border-v-border flex gap-2">
                         <input
                             type="text"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder="Ask anything..."
-                            className="flex-1 bg-v-secondary border border-v-border rounded-lg px-4 py-2 text-sm text-v-main placeholder-v-muted focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+                            placeholder="Ask Copilot or type command…"
+                            spellCheck={false}
+                            className="flex-1 bg-v-secondary border border-v-border rounded-xl px-3.5 py-2 text-xs sm:text-sm text-v-main placeholder:text-v-muted focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-colors"
                             disabled={loading}
                         />
                         <button
                             onClick={handleSend}
                             disabled={!message.trim() || loading}
-                            className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                            aria-label="Send message to Copilot"
+                            title="Send prompt"
+                            className="bg-purple-600 text-white p-2 rounded-xl hover:bg-purple-700 disabled:opacity-40 transition-all shadow-sm active:scale-95 flex-shrink-0"
                         >
-                            <Send size={18} />
+                            <Send size={16} />
                         </button>
                     </div>
                 </div>

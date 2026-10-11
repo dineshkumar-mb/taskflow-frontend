@@ -148,27 +148,27 @@ const Dashboard = () => {
             </header>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                 {[
-                    { label: 'Total Projects', value: stats.totalProjects, icon: Target, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                    { label: 'Total Issues', value: stats.totalIssues, icon: CheckSquare, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-                    { label: 'Team Members', value: stats.totalMembers ?? 0, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                    { label: 'Active Sprints', value: 3, icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10' } // Hardcoded for now
+                    { label: 'Total Projects', value: stats.totalProjects ?? 0, icon: Target, color: 'text-blue-500', bg: 'bg-blue-500/10 border-blue-500/20' },
+                    { label: 'Total Issues', value: stats.totalIssues ?? 0, icon: CheckSquare, color: 'text-indigo-500', bg: 'bg-indigo-500/10 border-indigo-500/20' },
+                    { label: 'Team Members', value: stats.totalMembers ?? 0, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+                    { label: 'Active Sprints', value: stats.activeSprints ?? 0, icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10 border-amber-500/20' }
                 ].map((stat, i) => (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
+                        transition={{ delay: i * 0.08 }}
                         key={stat.label}
-                        className="bg-v-primary p-6 rounded-xl border border-v-border shadow-sm transition-colors"
+                        className="group bg-v-primary p-5 sm:p-6 rounded-2xl border border-v-border shadow-sm hover:shadow-md hover:border-blue-500/30 transition-all duration-200"
                     >
                         <div className="flex items-center gap-4">
-                            <div className={`p-3 rounded-lg flex items-center justify-center ${stat.bg} ${stat.color}`}>
-                                <stat.icon size={24} />
+                            <div className={`p-3 rounded-xl border flex items-center justify-center transition-transform group-hover:scale-110 duration-200 ${stat.bg} ${stat.color}`}>
+                                <stat.icon size={22} />
                             </div>
-                            <div>
-                                <p className="text-sm text-v-muted font-medium">{stat.label}</p>
-                                <p className="text-2xl font-bold text-v-main">{stat.value}</p>
+                            <div className="min-w-0">
+                                <p className="text-xs sm:text-sm text-v-muted font-medium truncate">{stat.label}</p>
+                                <p className="text-2xl sm:text-3xl font-extrabold text-v-main tracking-tight font-mono tabular-nums">{stat.value}</p>
                             </div>
                         </div>
                     </motion.div>

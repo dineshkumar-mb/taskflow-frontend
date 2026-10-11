@@ -53,8 +53,17 @@ const IssueCard = ({ issue, onClick }) => {
             style={style}
             {...listeners}
             {...attributes}
+            role="button"
+            tabIndex={0}
+            aria-label={`${issue.key ? issue.key + ': ' : ''}${issue.title}. Priority ${issue.priority || 'normal'}.`}
             onClick={() => onClick(issue)}
-            className={`group cursor-grab active:cursor-grabbing rounded-xl bg-v-primary p-3.5 shadow-sm border border-v-border hover:border-blue-500/50 hover:shadow-md transition-all select-none ${isDragging ? 'opacity-50 shadow-xl ring-2 ring-blue-500 rotate-1 z-50 relative' : ''}`}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onClick(issue);
+                }
+            }}
+            className={`group cursor-grab active:cursor-grabbing rounded-xl bg-v-primary p-3.5 shadow-sm border border-v-border hover:border-blue-500/50 hover:shadow-md transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isDragging ? 'opacity-50 shadow-xl ring-2 ring-blue-500 rotate-1 z-50 relative' : ''}`}
         >
             {/* Issue key + type */}
             <div className="flex items-center gap-1.5 mb-2.5">
@@ -95,17 +104,17 @@ const IssueCard = ({ issue, onClick }) => {
 
                 <div className="flex items-center gap-2">
                     {issue.dueDate && (
-                        <span className={`flex items-center gap-1 text-[10px] font-medium border rounded px-1.5 py-0.5 ${new Date(issue.dueDate) < new Date() && issue.status !== 'done' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-v-secondary text-v-muted border-v-border'}`}>
+                        <span className={`flex items-center gap-1 text-[10px] font-medium border rounded px-1.5 py-0.5 font-mono tabular-nums ${new Date(issue.dueDate) < new Date() && issue.status !== 'done' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-v-secondary text-v-muted border-v-border'}`}>
                             <Calendar size={10} />
                             {format(new Date(issue.dueDate), 'MMM d')}
                         </span>
                     )}
                     {issue.storyPoints && (
-                        <span className="text-[10px] text-v-muted bg-v-secondary border border-v-border rounded px-1.5 py-0.5 font-medium">{issue.storyPoints}sp</span>
+                        <span className="text-[10px] text-v-muted bg-v-secondary border border-v-border rounded px-1.5 py-0.5 font-medium font-mono tabular-nums">{issue.storyPoints}sp</span>
                     )}
                     {issue.assignee ? (
                         <div
-                            className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0 ring-1 ring-border-main"
+                            className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[10px] text-white font-bold flex-shrink-0 ring-1 ring-v-border"
                             title={issue.assignee.name}
                         >
                             {issue.assignee.name?.charAt(0).toUpperCase()}

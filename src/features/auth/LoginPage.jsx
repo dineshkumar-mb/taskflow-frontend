@@ -474,6 +474,28 @@ const LoginPage = () => {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Legal links required for Cashfree Payment Gateway compliance */}
+                        <div style={{
+                            marginTop: 22,
+                            paddingTop: 14,
+                            borderTop: '1px solid rgba(255,255,255,0.08)',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '10px',
+                            fontSize: 11,
+                            color: 'rgba(148,163,184,0.7)',
+                        }}>
+                            <Link to="/terms" style={{ color: 'rgba(148,163,184,0.85)', textDecoration: 'none' }} className="hover:text-indigo-400 transition-colors">Terms</Link>
+                            <span>•</span>
+                            <Link to="/privacy" style={{ color: 'rgba(148,163,184,0.85)', textDecoration: 'none' }} className="hover:text-indigo-400 transition-colors">Privacy</Link>
+                            <span>•</span>
+                            <Link to="/refund-policy" style={{ color: 'rgba(148,163,184,0.85)', textDecoration: 'none' }} className="hover:text-indigo-400 transition-colors">Refund Policy</Link>
+                            <span>•</span>
+                            <Link to="/contact" style={{ color: 'rgba(148,163,184,0.85)', textDecoration: 'none' }} className="hover:text-indigo-400 transition-colors">Contact Us</Link>
+                        </div>
                     </div>
                 </div>
 

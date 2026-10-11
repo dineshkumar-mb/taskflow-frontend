@@ -40,7 +40,19 @@ const AIRiskPanel = ({ projectId, projectName }) => {
 
     return (
         <div className="bg-v-primary border border-v-border rounded-xl shadow-sm overflow-hidden transition-all duration-300">
-            <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-v-secondary/50 transition-colors" onClick={() => setExpanded(!expanded)}>
+            <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={expanded}
+                className="p-4 flex items-center justify-between cursor-pointer hover:bg-v-secondary/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                onClick={() => setExpanded(!expanded)}
+                onKeyDown={(e) => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                        e.preventDefault();
+                        setExpanded(!expanded);
+                    }
+                }}
+            >
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
                         <Bot size={18} />

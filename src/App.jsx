@@ -33,13 +33,17 @@ const GlobalMeetingsPage = lazy(() => import('./features/meeting/GlobalMeetingsP
 const MeetingRoom = lazy(() => import('./features/meeting/MeetingRoom').then(m => ({ default: m.MeetingRoom })));
 const MOMPreview = lazy(() => import('./features/meeting/MOMPreview').then(m => ({ default: m.MOMPreview })));
 const ServerWakeUpBanner = lazy(() => import('./components/ui/ServerWakeUpBanner'));
+const LegalLayout = lazy(() => import('./features/legal/LegalLayout'));
+const TermsPage = lazy(() => import('./features/legal/TermsPage'));
+const PrivacyPage = lazy(() => import('./features/legal/PrivacyPage'));
+const RefundPolicyPage = lazy(() => import('./features/legal/RefundPolicyPage'));
+const ContactUsPage = lazy(() => import('./features/legal/ContactUsPage'));
 
 const LoadingFallback = () => (
   <div className="flex h-screen items-center justify-center bg-gray-50">
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
   </div>
 );
-import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const dispatch = useDispatch();
@@ -72,6 +76,14 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+          {/* Public Legal & Compliance Pages */}
+          <Route element={<LegalLayout />}>
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/contact" element={<ContactUsPage />} />
+          </Route>
 
           {/* Protected Routes */}
           <Route path="/" element={<DashboardLayout />}>

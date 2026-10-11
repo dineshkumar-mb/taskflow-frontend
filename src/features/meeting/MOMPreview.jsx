@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from '../../utils/axiosInstance';
-import { CheckCircle, AlertCircle, Clock, Calendar as CalendarIcon, FileText, Share2, ArrowLeft, Trash2, User, Plus } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { CheckCircle, AlertCircle, Clock, Calendar as CalendarIcon, FileText, Share2, ArrowLeft, Trash2, User, Plus, RefreshCw, AlertTriangle } from 'lucide-react';
 
 export const MOMPreview = () => {
   const { meetingId } = useParams();
@@ -69,11 +70,11 @@ export const MOMPreview = () => {
       await axios.post(`/meetings/${meetingId}/mom/confirm`, {
         updatedMOM: editedMOM
       });
-      alert('MOM sent to participants and action items created!');
+      toast.success('MOM sent to participants and action items created!');
       navigate(`/dashboard`);
     } catch (error) {
       console.error('Error confirming MOM:', error);
-      alert('Failed to confirm and send MOM');
+      toast.error('Failed to confirm and send MOM');
     } finally {
       setSending(false);
     }
@@ -82,7 +83,7 @@ export const MOMPreview = () => {
   // ✅ Full loading screen while fetching
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-v-background text-v-text space-y-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-v-background text-v-main space-y-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         <h2 className="text-xl font-semibold">{generating ? 'AI is generating your MOM...' : 'Loading meeting...'}</h2>
         <p className="text-v-muted">{generating ? 'This usually takes 20–40 seconds.' : 'Please wait.'}</p>
@@ -93,17 +94,19 @@ export const MOMPreview = () => {
   // ✅ Error state
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-v-background text-v-text space-y-6">
-        <div className="text-5xl">⚠️</div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-v-background text-v-main space-y-6">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+          <AlertTriangle size={36} />
+        </div>
         <h2 className="text-xl font-semibold">MOM Generation Failed</h2>
-        <p className="text-v-muted">{error}</p>
+        <p className="text-v-muted text-center max-w-md">{error}</p>
 
         <div className="flex gap-4">
           <button
             onClick={fetchAndGenerateMOM}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium shadow-sm"
           >
-            🔄 Retry Generation
+            <RefreshCw size={16} /> Retry Generation
           </button>
 
           <button
@@ -111,14 +114,14 @@ export const MOMPreview = () => {
               const pid = meeting?.projectId?._id || meeting?.projectId || '';
               navigate(pid ? `/projects/${pid}` : '/dashboard');
             }}
-            className="px-4 py-2 bg-v-secondary hover:bg-v-border text-v-text rounded transition-colors"
+            className="px-4 py-2 bg-v-secondary hover:bg-v-border text-v-main border border-v-border rounded-lg transition-colors text-sm font-medium"
           >
             Skip & Go to Project
           </button>
         </div>
 
-        <p className="text-sm text-v-muted/70">
-          Tip: Check that your Gemini API key is valid and has available quota.
+        <p className="text-xs text-v-muted">
+          Tip: Check that your Gemini API key is configured with available quota.
         </p>
       </div>
     );

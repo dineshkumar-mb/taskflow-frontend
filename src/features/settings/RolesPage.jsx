@@ -169,10 +169,19 @@ const RolesPage = () => {
                                         return (
                                             <div 
                                                 key={perm.id}
+                                                role="checkbox"
+                                                aria-checked={isChecked}
+                                                tabIndex={isAll ? -1 : 0}
                                                 onClick={() => !isAll && togglePermission(perm.id)}
-                                                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${isChecked ? 'bg-blue-500/10 border-blue-500/30' : 'bg-v-bg border-v-border hover:border-v-border/80'}`}
+                                                onKeyDown={(e) => {
+                                                    if ((e.key === ' ' || e.key === 'Enter') && !isAll) {
+                                                        e.preventDefault();
+                                                        togglePermission(perm.id);
+                                                    }
+                                                }}
+                                                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${isChecked ? 'bg-blue-500/10 border-blue-500/30' : 'bg-v-bg border-v-border hover:border-v-border/80'}`}
                                             >
-                                                <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${isChecked ? 'bg-blue-600 border-blue-600 text-white' : 'border-v-border'}`}>
+                                                <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${isChecked ? 'bg-blue-600 border-blue-600 text-white' : 'border-v-border bg-v-primary'}`}>
                                                     {isChecked && <Check size={14} />}
                                                 </div>
                                                 <div className="flex flex-col">
@@ -189,13 +198,13 @@ const RolesPage = () => {
                                 <button
                                     type="button"
                                     onClick={handleCloseForm}
-                                    className="px-4 py-2 text-sm font-medium text-v-muted hover:text-v-main"
+                                    className="px-4 py-2 text-sm font-medium text-v-muted hover:text-v-main transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium"
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
                                 >
                                     Save Role
                                 </button>
@@ -210,20 +219,28 @@ const RolesPage = () => {
                             </div>
                         ) : roles.length > 0 ? (
                             roles.map(role => (
-                                <div key={role._id} className="bg-v-component border border-v-border rounded-xl p-5 flex flex-col h-full">
+                                <div key={role._id} className="bg-v-component border border-v-border hover:border-v-border/80 rounded-xl p-5 flex flex-col h-full transition-all shadow-sm">
                                     <div className="flex justify-between items-start mb-2">
                                         <h3 className="text-lg font-bold text-v-main flex items-center gap-2">
                                             {role.name}
                                             {role.isSystem && (
-                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500 uppercase tracking-wider">System</span>
+                                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 border border-blue-500/20 text-blue-500 uppercase tracking-wider">System</span>
                                             )}
                                         </h3>
                                         {!role.isSystem && (
                                             <div className="flex gap-2">
-                                                <button onClick={() => handleOpenForm(role)} className="p-1.5 text-v-muted hover:text-blue-500 rounded bg-v-bg">
+                                                <button
+                                                    onClick={() => handleOpenForm(role)}
+                                                    aria-label={`Edit ${role.name} role`}
+                                                    className="p-1.5 text-v-muted hover:text-blue-500 rounded bg-v-bg border border-v-border transition-colors"
+                                                >
                                                     <Edit2 size={14} />
                                                 </button>
-                                                <button onClick={() => handleDelete(role._id)} className="p-1.5 text-v-muted hover:text-red-500 rounded bg-v-bg">
+                                                <button
+                                                    onClick={() => handleDelete(role._id)}
+                                                    aria-label={`Delete ${role.name} role`}
+                                                    className="p-1.5 text-v-muted hover:text-red-500 rounded bg-v-bg border border-v-border transition-colors"
+                                                >
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Sparkles, Loader2, X } from 'lucide-react';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosInstance';
 import { createSprint } from '../sprint/sprintSlice';
 import { reorderIssues, getIssues } from '../board/boardSlice';
 
@@ -15,17 +15,28 @@ const AISprintPlannerModal = ({ isOpen, onClose, backlogIssues }) => {
     const [plan, setPlan] = useState(null);
     const [isApplying, setIsApplying] = useState(false);
 
+    // Escape key listener
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     const handleGeneratePlan = async () => {
-        if (backlogIssues.length === 0) {
+        if (!backlogIssues || backlogIssues.length === 0) {
             toast.error("Backlog is empty. Add issues to the backlog first.");
             return;
         }
 
         setIsLoading(true);
         try {
-            const { data } = await axios.post(`/api/ai/sprint-plan`, {
+            const { data } = await axiosInstance.post('/ai/sprint-plan', {
                 projectId,
                 backlogIssues
             });
@@ -72,15 +83,24 @@ const AISprintPlannerModal = ({ isOpen, onClose, backlogIssues }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ai-sprint-planner-title"
+        >
             <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-v-primary border border-v-border shadow-2xl">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-v-border px-6 py-4">
-                    <h2 className="text-xl font-bold text-v-main flex items-center gap-2">
+                    <h2 id="ai-sprint-planner-title" className="text-xl font-bold text-v-main flex items-center gap-2">
                         <Sparkles className="text-purple-500" size={24} />
                         AI Sprint Planner
                     </h2>
-                    <button onClick={onClose} className="text-v-muted hover:text-v-main transition-colors">
+                    <button
+                        onClick={onClose}
+                        aria-label="Close sprint planner modal"
+                        className="text-v-muted hover:text-v-main p-1 rounded-lg hover:bg-v-secondary transition-colors"
+                    >
                         <X size={20} />
                     </button>
                 </div>

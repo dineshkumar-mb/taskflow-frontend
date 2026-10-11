@@ -93,6 +93,16 @@ const IssueModal = ({ isOpen, onClose, issue }) => {
         }
     }, [issue, dispatch, user]);
 
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     const handleCreateSubtask = async () => {
         if (!newSubtaskTitle.trim()) return;
         setIsCreatingSubtask(true);
@@ -330,10 +340,16 @@ const IssueModal = ({ isOpen, onClose, issue }) => {
                         disabled={isDeleting}
                         className="rounded-lg p-2 text-v-muted hover:bg-red-500/10 hover:text-red-500 transition-colors"
                         title="Delete issue"
+                        aria-label="Delete issue"
                     >
                         <Trash2 size={16} />
                     </button>
-                    <button onClick={onClose} className="rounded-lg p-2 text-v-muted hover:bg-v-secondary transition-colors">
+                    <button
+                        onClick={onClose}
+                        className="rounded-lg p-2 text-v-muted hover:bg-v-secondary transition-colors"
+                        title="Close modal"
+                        aria-label="Close modal"
+                    >
                         <X size={18} />
                     </button>
                 </div>

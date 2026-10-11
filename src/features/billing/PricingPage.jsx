@@ -148,7 +148,13 @@ const PricingPage = () => {
                 couponCode: appliedCoupon ? appliedCoupon.code : null
             });
 
-            if (res.data.subscription_session_id) {
+            if (res.data.payment_session_id) {
+                const cashfree = window.Cashfree({ mode: 'sandbox' });
+                cashfree.checkout({
+                    paymentSessionId: res.data.payment_session_id,
+                    redirectTarget: '_self'
+                });
+            } else if (res.data.subscription_session_id) {
                 const cashfree = window.Cashfree({ mode: 'sandbox' });
                 cashfree.subscriptionsCheckout({
                     subsSessionId: res.data.subscription_session_id,
@@ -188,11 +194,22 @@ const PricingPage = () => {
         setShowCouponList(false);
     };
 
+    // Keyboard Escape listener
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && showCheckoutModal) {
+                closeModal();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [showCheckoutModal]);
+
     return (
         <div className="py-8 px-4 bg-v-primary text-v-main min-h-screen">
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl font-extrabold text-v-main mb-4">Simple, transparent pricing</h1>
+                    <h1 className="text-4xl font-extrabold text-v-main mb-4 tracking-tight">Simple, transparent pricing</h1>
                     <p className="text-xl text-v-muted">Choose the plan that's right for your team.</p>
                 </div>
 
@@ -200,14 +217,14 @@ const PricingPage = () => {
                     {plans.map((plan) => (
                         <div
                             key={plan.name}
-                            className={`bg-v-primary rounded-2xl shadow-xl p-8 border transition-all ${
+                            className={`bg-v-primary rounded-2xl shadow-xl p-8 border transition-all duration-200 ${
                                 plan.popular
-                                    ? 'border-indigo-500 ring-2 ring-indigo-500 ring-opacity-10 scale-105 shadow-indigo-500/5'
-                                    : 'border-v-border hover:shadow-2xl'
+                                    ? 'border-indigo-500 ring-2 ring-indigo-500/20 scale-105 shadow-indigo-500/10'
+                                    : 'border-v-border hover:shadow-2xl hover:border-v-border/80'
                             }`}
                         >
                             {plan.popular && (
-                                <span className="inline-block px-4 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-xs font-bold uppercase tracking-wider mb-4">
+                                <span className="inline-block px-4 py-1 rounded-full bg-indigo-500/10 text-indigo-500 text-xs font-bold uppercase tracking-wider mb-4 border border-indigo-500/20">
                                     Most Popular
                                 </span>
                             )}
@@ -217,7 +234,7 @@ const PricingPage = () => {
                             </div>
                             <p className="text-v-muted mb-6">{plan.description}</p>
                             <div className="flex items-baseline gap-1 mb-8">
-                                <span className="text-4xl font-extrabold text-v-main">{plan.price}</span>
+                                <span className="text-4xl font-extrabold text-v-main font-mono tabular-nums">{plan.price}</span>
                                 <span className="text-v-muted">/month</span>
                             </div>
 
@@ -237,9 +254,9 @@ const PricingPage = () => {
 
                             <ul className="mt-8 space-y-4">
                                 {plan.features.map((feature) => (
-                                    <li key={feature} className="flex items-center gap-3 text-slate-600 text-sm">
+                                    <li key={feature} className="flex items-center gap-3 text-v-muted text-sm">
                                         <Check size={18} className="text-emerald-500 flex-shrink-0" />
-                                        {feature}
+                                        <span>{feature}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -250,12 +267,21 @@ const PricingPage = () => {
 
             {/* ── Checkout Modal ── */}
             {showCheckoutModal && selectedPlan && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm px-4"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="checkout-modal-title"
+                >
                     <div className="bg-v-primary border border-v-border rounded-2xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-5">
                         {/* Header */}
                         <div className="flex justify-between items-center">
-                            <h3 className="text-xl font-bold text-v-main">Checkout Confirmation</h3>
-                            <button onClick={closeModal} className="text-v-muted hover:text-v-main transition-colors">
+                            <h3 id="checkout-modal-title" className="text-xl font-bold text-v-main">Checkout Confirmation</h3>
+                            <button
+                                onClick={closeModal}
+                                aria-label="Close checkout modal"
+                                className="text-v-muted hover:text-v-main p-1 rounded-lg hover:bg-v-secondary transition-colors"
+                            >
                                 <X size={20} />
                             </button>
                         </div>

@@ -106,7 +106,7 @@ const MembersPage = () => {
             </div>
 
             {isAdmin && (
-                <div className="rounded-xl bg-v-primary border border-v-main shadow-sm p-4 sm:p-5 transition-colors">
+                <div className="rounded-xl bg-v-primary border border-v-border shadow-sm p-4 sm:p-5 transition-colors">
                     <h2 className="text-sm font-semibold text-v-main mb-4 flex items-center gap-2">
                         <UserPlus size={16} className="text-blue-500" />
                         Invite Member
@@ -120,10 +120,10 @@ const MembersPage = () => {
                                 onChange={e => handleSearch(e.target.value)}
                                 placeholder="Search name or email..."
                                 required
-                                className="mt-1 w-full rounded-lg border border-v-main bg-v-primary px-3 py-2 text-sm text-v-main placeholder:text-v-muted/50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                className="mt-1 w-full rounded-lg border border-v-border bg-v-primary px-3 py-2 text-sm text-v-main placeholder:text-v-muted/50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                             />
                             {searchResults.length > 0 && (
-                                <div className="absolute z-10 mt-1 w-full sm:w-64 bg-v-primary border border-v-main rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto transition-colors">
+                                <div className="absolute z-10 mt-1 w-full sm:w-64 bg-v-primary border border-v-border rounded-lg shadow-lg overflow-hidden max-h-48 overflow-y-auto transition-colors">
                                     {searchResults.map(u => (
                                         <button
                                             key={u._id}
@@ -135,7 +135,7 @@ const MembersPage = () => {
                                                 <p className="font-medium text-v-main truncate">{u.name}</p>
                                                 <p className="text-xs text-v-muted truncate">{u.email}</p>
                                             </div>
-                                            {u.avatar && <img src={u.avatar} className="h-6 w-6 rounded-full" />}
+                                            {u.avatar && <img src={u.avatar} alt={u.name} className="h-6 w-6 rounded-full" />}
                                         </button>
                                     ))}
                                 </div>
@@ -147,7 +147,7 @@ const MembersPage = () => {
                             <select
                                 value={inviteRole}
                                 onChange={e => setInviteRole(e.target.value)}
-                                className="mt-1 w-full rounded-lg border border-v-main bg-v-primary text-v-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                className="mt-1 w-full rounded-lg border border-v-border bg-v-primary text-v-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                             >
                                 <option value="Project Manager">Project Manager</option>
                                 <option value="Developer">Developer</option>
@@ -159,7 +159,7 @@ const MembersPage = () => {
                         <button
                             type="submit"
                             disabled={isInviting}
-                            className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 transition-colors h-10"
+                            className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60 transition-colors h-10 shadow-sm active:scale-95"
                         >
                             {isInviting ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
                             Invite
@@ -169,7 +169,7 @@ const MembersPage = () => {
             )}
 
             {/* Members list */}
-            <div className="rounded-xl bg-v-primary border border-v-main shadow-sm overflow-hidden transition-colors">
+            <div className="rounded-xl bg-v-primary border border-v-border shadow-sm overflow-hidden transition-colors">
                 {isLoading ? (
                     <div className="divide-y divide-v-border">
                         {[...Array(5)].map((_, i) => <MemberRowSkeleton key={i} />)}
@@ -177,7 +177,7 @@ const MembersPage = () => {
                 ) : members.length === 0 ? (
                     <p className="py-12 text-center text-v-muted text-sm">No members found.</p>
                 ) : (
-                    <div className="divide-y divide-v-main">
+                    <div className="divide-y divide-v-border">
                         {members.map(member => (
                             <div key={member._id} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 hover:bg-v-secondary transition-colors group">
                                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
@@ -187,7 +187,7 @@ const MembersPage = () => {
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm font-semibold text-v-main truncate">{member.name}</p>
                                         {member._id === user?._id && (
-                                            <span className="text-xs text-v-muted">(you)</span>
+                                            <span className="text-xs text-v-muted font-mono">(you)</span>
                                         )}
                                     </div>
                                     <p className="text-xs text-v-muted truncate hidden sm:block">{member.email}</p>
@@ -199,7 +199,8 @@ const MembersPage = () => {
                                 {member._id !== user?._id && isAdmin && (
                                     <button
                                         onClick={() => handleRemove(member._id, member.name)}
-                                        className="rounded-lg p-1.5 text-v-muted hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"
+                                        aria-label={`Remove ${member.name}`}
+                                        className="rounded-lg p-1.5 text-v-muted hover:bg-red-500/10 hover:text-red-500 transition-all flex-shrink-0"
                                         title="Remove member"
                                     >
                                         <Trash2 size={15} />

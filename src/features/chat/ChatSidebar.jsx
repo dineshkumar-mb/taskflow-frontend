@@ -48,26 +48,32 @@ const ChatSidebar = ({ onClose }) => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-gray-900 shadow-2xl rounded-t-xl overflow-hidden border-x border-gray-100 dark:border-gray-800">
-            <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
-                <h3 className="font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                    <MessageSquare size={18} className="text-blue-500" />
-                    Messages
+        <div className="flex flex-col h-full bg-v-primary shadow-2xl rounded-2xl overflow-hidden border border-v-border">
+            <div className="p-3.5 border-b border-v-border bg-v-secondary flex items-center justify-between">
+                <h3 className="font-bold text-sm text-v-main flex items-center gap-2">
+                    <MessageSquare size={16} className="text-blue-500" />
+                    Team Messages
                 </h3>
-                <button onClick={onClose} className="lg:hidden text-gray-400 hover:text-gray-600">
-                    <X size={18} />
+                <button
+                    onClick={onClose}
+                    className="p-1 rounded-lg text-v-muted hover:text-v-main hover:bg-v-primary transition-colors"
+                    title="Close messages"
+                    aria-label="Close messages"
+                >
+                    <X size={16} />
                 </button>
             </div>
 
             {/* Search */}
-            <div className="p-3">
+            <div className="p-3 border-b border-v-border/60">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-v-muted pointer-events-none" size={14} />
                     <input
                         value={searchQuery}
                         onChange={(e) => handleSearch(e.target.value)}
-                        placeholder="Search people..."
-                        className="w-full pl-9 pr-3 py-1.5 bg-gray-100 dark:bg-gray-800 border-none rounded-lg text-xs focus:ring-2 focus:ring-blue-500 dark:text-white"
+                        placeholder="Search team members…"
+                        spellCheck={false}
+                        className="w-full pl-9 pr-3 py-1.5 bg-v-secondary border border-v-border rounded-xl text-xs text-v-main placeholder:text-v-muted focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                     />
                 </div>
             </div>
@@ -76,24 +82,24 @@ const ChatSidebar = ({ onClose }) => {
             <div className="flex-1 overflow-y-auto">
                 {searchQuery ? (
                     <div className="p-2 space-y-1">
-                        <p className="px-2 text-[10px] font-semibold text-gray-400 uppercase tracking-tight mb-2">Search Results</p>
+                        <p className="px-2 text-[10px] font-semibold text-v-muted uppercase tracking-tight mb-2">Search Results</p>
                         {isSearching ? (
                             <div className="flex justify-center p-4"><Loader2 size={16} className="animate-spin text-blue-500" /></div>
                         ) : searchResults.length === 0 ? (
-                            <p className="text-center text-xs text-gray-500 p-4">No people found</p>
+                            <p className="text-center text-xs text-v-muted p-4">No team members found</p>
                         ) : (
                             searchResults.map(u => (
                                 <button
                                     key={u._id}
                                     onClick={() => startConversation(u._id)}
-                                    className="w-full flex items-center gap-3 p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-left"
+                                    className="w-full flex items-center gap-3 p-2 hover:bg-v-secondary rounded-xl transition-colors text-left"
                                 >
-                                    <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
-                                        {u.name.charAt(0)}
+                                    <div className="h-8 w-8 rounded-full bg-blue-500/15 text-blue-500 flex items-center justify-center font-bold text-xs border border-blue-500/20">
+                                        {u.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{u.name}</p>
-                                        <p className="text-[10px] text-gray-500 truncate">{u.email}</p>
+                                        <p className="text-xs sm:text-sm font-semibold text-v-main truncate">{u.name}</p>
+                                        <p className="text-[10px] text-v-muted truncate">{u.email}</p>
                                     </div>
                                 </button>
                             ))
@@ -101,11 +107,14 @@ const ChatSidebar = ({ onClose }) => {
                     </div>
                 ) : (
                     <div className="p-2 space-y-1">
-                        <p className="px-2 text-[10px] font-semibold text-gray-400 uppercase tracking-tight mb-2">Recent</p>
+                        <p className="px-2 text-[10px] font-semibold text-v-muted uppercase tracking-wider mb-1.5">Conversations</p>
                         {conversations.length === 0 ? (
                             <div className="p-8 text-center flex flex-col items-center">
-                                <MessageCircle size={24} className="text-gray-200 mb-2" />
-                                <p className="text-xs text-gray-400">No conversations yet</p>
+                                <div className="h-10 w-10 rounded-full bg-v-secondary flex items-center justify-center mb-2">
+                                    <MessageCircle size={18} className="text-v-muted opacity-50" />
+                                </div>
+                                <p className="text-xs font-medium text-v-main">No messages yet</p>
+                                <p className="text-[11px] text-v-muted mt-0.5">Search a teammate above to chat</p>
                             </div>
                         ) : (
                             conversations.map(conv => {
@@ -114,22 +123,22 @@ const ChatSidebar = ({ onClose }) => {
                                     <button
                                         key={conv._id}
                                         onClick={() => dispatch(setActiveConversation(conv))}
-                                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors text-left group"
+                                        className="w-full flex items-center gap-3 p-2.5 hover:bg-v-secondary rounded-xl transition-colors text-left group"
                                     >
                                         <div className="relative">
-                                            <div className="h-10 w-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
-                                                {other?.name?.charAt(0)}
+                                            <div className="h-9 w-9 rounded-full bg-indigo-500/15 text-indigo-500 flex items-center justify-center font-bold text-xs border border-indigo-500/20">
+                                                {other?.name?.charAt(0).toUpperCase()}
                                             </div>
-                                            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
+                                            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 bg-emerald-500 rounded-full border-2 border-v-primary" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline mb-0.5">
-                                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">{other?.name}</p>
-                                                <span className="text-[9px] text-gray-400">
+                                                <p className="text-xs sm:text-sm font-semibold text-v-main truncate">{other?.name}</p>
+                                                <span className="text-[9px] text-v-muted font-medium">
                                                     {conv.updatedAt && format(new Date(conv.updatedAt), 'h:mm a')}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                            <p className="text-xs text-v-muted truncate">
                                                 {conv.lastMessage?.content || 'Started a conversation'}
                                             </p>
                                         </div>

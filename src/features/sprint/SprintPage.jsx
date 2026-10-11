@@ -207,7 +207,12 @@ const SprintCard = ({ sprint, issues, onStart, onComplete, onIssueClick }) => {
             <div className="flex items-start gap-4 p-5">
                 <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <button onClick={() => setExpanded(!expanded)} className="text-v-muted hover:text-v-main transition-colors">
+                        <button
+                            onClick={() => setExpanded(!expanded)}
+                            aria-expanded={expanded}
+                            aria-label={`${expanded ? 'Collapse' : 'Expand'} sprint details`}
+                            className="text-v-muted hover:text-v-main p-1 rounded hover:bg-v-secondary transition-colors"
+                        >
                             {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                         </button>
                         <h3 className="text-base font-semibold text-v-main">{sprint.name}</h3>
@@ -216,11 +221,11 @@ const SprintCard = ({ sprint, issues, onStart, onComplete, onIssueClick }) => {
                     {sprint.goal && (
                         <p className="text-sm text-v-muted mb-2 ml-7 leading-relaxed">{sprint.goal}</p>
                     )}
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-v-muted ml-7">
-                        <span className="flex items-center gap-1"><ListTodo size={12} />{total} issues</span>
-                        <span className="flex items-center gap-1"><CheckCircle size={12} className="text-green-500" />{done} done</span>
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-v-muted ml-7 font-mono tabular-nums">
+                        <span className="flex items-center gap-1 font-sans"><ListTodo size={12} />{total} issues</span>
+                        <span className="flex items-center gap-1 font-sans"><CheckCircle size={12} className="text-green-500" />{done} done</span>
                         {sprint.startDate && (
-                            <span className="flex items-center gap-1"><Clock size={12} />
+                            <span className="flex items-center gap-1 font-sans"><Clock size={12} />
                                 {format(new Date(sprint.startDate), 'MMM d')} –{' '}
                                 {sprint.endDate ? format(new Date(sprint.endDate), 'MMM d') : '?'}
                             </span>
@@ -232,11 +237,11 @@ const SprintCard = ({ sprint, issues, onStart, onComplete, onIssueClick }) => {
                         <div className="mt-3 ml-7">
                             <div className="h-1.5 w-full rounded-full bg-v-secondary overflow-hidden">
                                 <div
-                                    className="h-full rounded-full bg-green-500 transition-all"
+                                    className="h-full rounded-full bg-green-500 transition-all duration-300"
                                     style={{ width: `${progress}%` }}
                                 />
                             </div>
-                            <p className="mt-1 text-xs text-v-muted">{Math.round(progress)}% complete</p>
+                            <p className="mt-1 text-xs text-v-muted font-mono tabular-nums">{Math.round(progress)}% complete</p>
                         </div>
                     )}
                 </div>
@@ -246,7 +251,7 @@ const SprintCard = ({ sprint, issues, onStart, onComplete, onIssueClick }) => {
                     {sprint.status === 'future' && (
                         <button
                             onClick={() => onStart(sprint._id)}
-                            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 transition-colors"
+                            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 transition-colors shadow-sm active:scale-95"
                         >
                             <Play size={12} />
                             Start Sprint
@@ -255,7 +260,7 @@ const SprintCard = ({ sprint, issues, onStart, onComplete, onIssueClick }) => {
                     {sprint.status === 'active' && (
                         <button
                             onClick={() => onComplete(sprint._id)}
-                            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+                            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors shadow-sm active:scale-95"
                         >
                             <CheckCircle size={12} />
                             Complete Sprint
@@ -273,8 +278,16 @@ const SprintCard = ({ sprint, issues, onStart, onComplete, onIssueClick }) => {
                             sprintIssues.map(issue => (
                                 <div
                                     key={issue._id}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => onIssueClick(issue)}
-                                    className="flex items-center gap-3 px-5 py-2.5 hover:bg-v-secondary transition-colors cursor-pointer group"
+                                    onKeyDown={(e) => {
+                                        if (e.key === ' ' || e.key === 'Enter') {
+                                            e.preventDefault();
+                                            onIssueClick(issue);
+                                        }
+                                    }}
+                                    className="flex items-center gap-3 px-5 py-2.5 hover:bg-v-secondary transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                                 >
                                     <span className="flex-shrink-0">{TYPE_ICONS[issue.type] || TYPE_ICONS.task}</span>
                                     <span className="text-xs text-v-muted font-mono w-16 flex-shrink-0">{issue.key}</span>

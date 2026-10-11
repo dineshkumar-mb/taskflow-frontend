@@ -1,34 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, ExternalLink, ShieldCheck, Loader2, Activity } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { CreditCard, ExternalLink, ShieldCheck, Loader2, Activity, CheckCircle2 } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
+import { toast } from 'react-toastify';
 import UsageBar from './UsageBar';
 import { BillingPageSkeleton } from '../../components/ui/Skeleton';
 
 const BillingPage = () => {
+    const [searchParams] = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [usage, setUsage] = useState(null);
     const [usageLoading, setUsageLoading] = useState(true);
 
+    const fetchUsage = async () => {
+        try {
+            const res = await axiosInstance.get('/billing/usage');
+            setUsage(res.data);
+        } catch (error) {
+            console.error('Failed to fetch usage:', error);
+        } finally {
+            setUsageLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchUsage = async () => {
-            try {
-                const res = await axiosInstance.get('/billing/usage');
-                setUsage(res.data);
-            } catch (error) {
-                console.error('Failed to fetch usage:', error);
-            } finally {
-                setUsageLoading(false);
-            }
-        };
         fetchUsage();
-    }, []);
+
+        // Check if returning from a Cashfree checkout with order_id
+        const orderId = searchParams.get('order_id');
+        if (orderId) {
+            axiosInstance.get(`/billing/verify-order/${orderId}`)
+                .then(res => {
+                    if (res.data.success) {
+                        toast.success(`Payment verified! ${res.data.plan.toUpperCase()} plan is now active.`);
+                        fetchUsage();
+                    }
+                })
+                .catch(err => {
+                    console.error('Order verification error:', err);
+                });
+        }
+    }, [searchParams]);
 
     const handleManageSubscription = async () => {
         setLoading(true);
         try {
-            // Use /billing/checkout to get a Cashfree subscription authLink
-            const res = await axiosInstance.post('/billing/checkout', { planPriceId: 'plan_pro' });
-            if (res.data.subscription_session_id) {
+            const res = await axiosInstance.post('/billing/checkout', { plan: 'pro' });
+            if (res.data.payment_session_id) {
+                const cashfree = window.Cashfree({ mode: "sandbox" });
+                cashfree.checkout({
+                    paymentSessionId: res.data.payment_session_id,
+                    redirectTarget: "_self"
+                });
+            } else if (res.data.subscription_session_id) {
                 const cashfree = window.Cashfree({ mode: "sandbox" });
                 cashfree.subscriptionsCheckout({
                     subsSessionId: res.data.subscription_session_id,
@@ -39,7 +63,7 @@ const BillingPage = () => {
             }
         } catch (error) {
             console.error('Checkout Error:', error);
-            alert('Failed to initialize billing. Please try again.');
+            toast.error(error.response?.data?.message || 'Failed to initialize billing. Please try again.');
         } finally {
             setLoading(false);
         }

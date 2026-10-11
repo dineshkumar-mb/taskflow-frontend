@@ -102,16 +102,16 @@ const WorkloadPage = () => {
                 </div>
             </div>
 
-            <div className="bg-v-primary rounded-xl border border-v-border overflow-hidden">
+            <div className="bg-v-primary rounded-xl border border-v-border overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-v-secondary text-v-muted">
                             <tr>
-                                <th className="px-6 py-4 font-medium">Team Member</th>
-                                <th className="px-6 py-4 font-medium">Issues</th>
-                                <th className="px-6 py-4 font-medium">Story Points</th>
-                                <th className="px-6 py-4 font-medium min-w-[200px]">Capacity Utilization</th>
-                                <th className="px-6 py-4 font-medium">Status</th>
+                                <th scope="col" className="px-6 py-4 font-medium">Team Member</th>
+                                <th scope="col" className="px-6 py-4 font-medium">Issues</th>
+                                <th scope="col" className="px-6 py-4 font-medium">Story Points</th>
+                                <th scope="col" className="px-6 py-4 font-medium min-w-[200px]">Capacity Utilization</th>
+                                <th scope="col" className="px-6 py-4 font-medium">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-v-border">
@@ -119,7 +119,7 @@ const WorkloadPage = () => {
                                 <tr key={data.user._id} className="hover:bg-v-secondary/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-white font-bold text-xs">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xs ring-1 ring-v-border">
                                                 {data.user.name?.charAt(0)}
                                             </div>
                                             <div>
@@ -128,20 +128,20 @@ const WorkloadPage = () => {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-v-main font-medium">
+                                    <td className="px-6 py-4 text-v-main font-medium font-mono tabular-nums">
                                         {data.assignedIssues}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 font-mono tabular-nums">
                                             <span className="font-medium text-v-main">{data.storyPoints}</span>
-                                            <span className="text-xs text-v-muted">({data.completedPoints} done)</span>
+                                            <span className="text-xs text-v-muted font-sans">({data.completedPoints} done)</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="w-full h-2.5 bg-v-secondary rounded-full overflow-hidden flex">
+                                        <div className="w-full h-2.5 bg-v-secondary rounded-full overflow-hidden flex border border-v-border/40">
                                             {/* Completed bar */}
                                             <div 
-                                                className="h-full bg-green-500 transition-all duration-500" 
+                                                className="h-full bg-emerald-500 transition-all duration-500" 
                                                 style={{ width: `${Math.min(100, (data.completedPoints / data.capacity) * 100)}%` }} 
                                                 title={`${data.completedPoints} completed points`}
                                             />
@@ -152,12 +152,12 @@ const WorkloadPage = () => {
                                                 title={`${data.storyPoints - data.completedPoints} remaining points`}
                                             />
                                         </div>
-                                        <p className="text-xs text-v-muted mt-1.5">{data.percentage}% of capacity</p>
+                                        <p className="text-xs text-v-muted mt-1.5 font-mono tabular-nums">{data.percentage}% of capacity</p>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                             data.status === 'Over Capacity' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
-                                            data.status === 'At Capacity' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
+                                            data.status === 'At Capacity' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
                                             'bg-blue-500/10 text-blue-500 border border-blue-500/20'
                                         }`}>
                                             {data.status}

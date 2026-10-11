@@ -4,13 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getIssues } from './boardSlice';
 import { Loader2, Calendar } from 'lucide-react';
 import { TimelinePageSkeleton } from '../../components/ui/Skeleton';
-import { format, differenceInDays, addDays, startOfWeek, endOfWeek } from 'date-fns';
+import { format, differenceInDays, addDays } from 'date-fns';
+import IssueModal from './IssueModal';
 
 const TimelinePage = () => {
     const { projectId } = useParams();
     const dispatch = useDispatch();
     const { issues, isLoading } = useSelector((state) => state.board);
-    const [viewRange, setViewRange] = useState(30); // days to show
+    const [selectedIssue, setSelectedIssue] = useState(null);
 
     useEffect(() => {
         if (projectId) {
@@ -36,9 +37,9 @@ const TimelinePage = () => {
 
     if (timelineData.length === 0) {
         return (
-            <div className="flex h-64 flex-col items-center justify-center text-v-muted gap-2">
-                <Calendar size={48} className="opacity-20" />
-                <p>No issues with due dates found.</p>
+            <div className="flex h-64 flex-col items-center justify-center text-v-muted gap-2 border border-dashed border-v-border rounded-xl bg-v-primary m-6">
+                <Calendar size={48} className="opacity-30 text-blue-500" />
+                <p className="font-medium text-v-main">No issues with due dates found.</p>
                 <p className="text-sm">Set due dates on issues to see them on the timeline.</p>
             </div>
         );
@@ -89,14 +90,25 @@ const TimelinePage = () => {
                             
                             // Color based on status
                             let bgColor = 'bg-blue-500';
-                            if (issue.status === 'done') bgColor = 'bg-green-500';
-                            if (issue.status === 'in_progress') bgColor = 'bg-yellow-500';
+                            if (issue.status === 'done') bgColor = 'bg-emerald-500';
+                            if (issue.status === 'in-progress' || issue.status === 'in_progress') bgColor = 'bg-amber-500';
 
                             return (
                                 <div key={issue._id} className="flex items-center group">
                                     {/* Issue Title (Sticky) */}
-                                    <div className="w-48 flex-shrink-0 sticky left-0 bg-v-primary z-10 pr-4 truncate text-sm text-v-main">
-                                        <span className="text-v-muted text-xs mr-2">{issue.key}</span>
+                                    <div
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => setSelectedIssue(issue)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === ' ' || e.key === 'Enter') {
+                                                e.preventDefault();
+                                                setSelectedIssue(issue);
+                                            }
+                                        }}
+                                        className="w-48 flex-shrink-0 sticky left-0 bg-v-primary z-10 pr-4 truncate text-sm text-v-main cursor-pointer hover:text-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 rounded"
+                                    >
+                                        <span className="text-v-muted text-xs mr-2 font-mono">{issue.key}</span>
                                         {issue.title}
                                     </div>
                                     
@@ -111,7 +123,16 @@ const TimelinePage = () => {
                                         
                                         {/* The Bar */}
                                         <div 
-                                            className={`absolute h-6 rounded-md ${bgColor} text-white text-xs flex items-center px-2 truncate shadow-sm transition-transform hover:scale-y-110 cursor-pointer`}
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => setSelectedIssue(issue)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === ' ' || e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    setSelectedIssue(issue);
+                                                }
+                                            }}
+                                            className={`absolute h-6 rounded-md ${bgColor} text-white text-xs flex items-center px-2 truncate shadow-sm transition-transform hover:scale-y-110 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white`}
                                             style={{
                                                 left: `${offsetDays * 40}px`,
                                                 width: `${durationDays * 40}px`
@@ -127,6 +148,13 @@ const TimelinePage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Issue Modal */}
+            <IssueModal
+                isOpen={!!selectedIssue}
+                onClose={() => setSelectedIssue(null)}
+                issue={selectedIssue}
+            />
         </div>
     );
 };

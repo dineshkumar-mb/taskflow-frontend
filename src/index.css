@@ -7,11 +7,17 @@
 }
 
 @theme {
+    /* ── Typography ── */
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
     /* ── Theme Tokens ── */
     --color-surface-sun: #ffffff;
-    --color-surface-moon: #0f172a;
-    --color-text-sun: #1e293b;
-    --color-text-moon: #f1f5f9;
+    --color-surface-moon: #0b0f19;
+    --color-card-sun: #ffffff;
+    --color-card-moon: #111827;
+    --color-text-sun: #0f172a;
+    --color-text-moon: #f8fafc;
     --color-text-dim-sun: #64748b;
     --color-text-dim-moon: #94a3b8;
     --color-border-sun: #e2e8f0;
@@ -21,8 +27,14 @@
     --color-v-primary: var(--color-surface-sun);
     --color-v-secondary: #f8fafc;
     --color-v-main: var(--color-text-sun);
+    --color-v-text: var(--color-text-sun);
     --color-v-muted: var(--color-text-dim-sun);
     --color-v-border: var(--color-border-sun);
+    --color-v-bg: #f8fafc;
+    --color-v-component: #ffffff;
+    --color-v-background: #ffffff;
+    --color-v-card: #ffffff;
+    --color-v-card-hover: #f1f5f9;
 }
 
 /* ── Dark Mode Overrides ── */
@@ -30,8 +42,30 @@
     --color-v-primary: var(--color-surface-moon);
     --color-v-secondary: #0f172a;
     --color-v-main: var(--color-text-moon);
+    --color-v-text: var(--color-text-moon);
     --color-v-muted: var(--color-text-dim-moon);
     --color-v-border: var(--color-border-moon);
+    --color-v-bg: #090d16;
+    --color-v-component: #111827;
+    --color-v-background: #0b0f19;
+    --color-v-card: #111827;
+    --color-v-card-hover: #1f2937;
+}
+
+html {
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* ── 3D & Animation Keyframes ────────────────────────────────────── */

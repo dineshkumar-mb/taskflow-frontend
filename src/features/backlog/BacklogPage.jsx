@@ -186,35 +186,46 @@ const BacklogPage = () => {
                 <h1 className="text-lg sm:text-xl font-bold text-v-main flex-shrink-0">Backlog</h1>
                 <div className="flex-1 w-full max-w-sm sm:mx-4">
                     <div className="relative flex items-center">
-                        <Search className="absolute left-2.5 h-4 w-4 text-v-muted" />
+                        <Search className="absolute left-2.5 h-4 w-4 text-v-muted pointer-events-none" />
                         <input
                             id="backlog-search-input"
                             type="text"
-                            placeholder="Press / to search..."
+                            placeholder="Search backlog issues… (Press /)"
                             value={jqlQuery}
                             onChange={(e) => setJqlQuery(e.target.value)}
-                            className="w-full rounded-md border border-v-border bg-v-primary py-1.5 pl-9 pr-3 text-sm text-v-main focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                            spellCheck={false}
+                            className="w-full rounded-xl border border-v-border bg-v-primary py-1.5 pl-9 pr-7 text-xs sm:text-sm text-v-main placeholder:text-v-muted focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                         />
+                        {jqlQuery && (
+                            <button
+                                onClick={() => setJqlQuery('')}
+                                className="absolute right-2 p-0.5 text-v-muted hover:text-v-main rounded"
+                                title="Clear search"
+                                aria-label="Clear search"
+                            >
+                                <X size={13} />
+                            </button>
+                        )}
                     </div>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                     <button
                         onClick={() => setIsPlannerOpen(true)}
-                        className="flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 px-2.5 sm:px-3 py-2 text-sm text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 transition-colors shadow-sm"
+                        className="flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 transition-colors shadow-sm"
                     >
                         <Sparkles size={14} />
                         <span className="hidden sm:inline">Auto-Plan</span>
                     </button>
                     <button
                         onClick={() => setShowCreateSprint(!showCreateSprint)}
-                        className="flex items-center gap-1.5 rounded-lg border border-v-border bg-v-primary px-2.5 sm:px-3 py-2 text-sm text-v-muted hover:bg-v-secondary transition-colors"
+                        className="flex items-center gap-1.5 rounded-xl border border-v-border bg-v-primary px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-v-main hover:bg-v-secondary transition-colors"
                     >
                         <Plus size={14} />
                         <span className="hidden sm:inline">Create Sprint</span>
                     </button>
                     <button
                         onClick={() => setIsCreateOpen(true)}
-                        className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-2.5 sm:px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-blue-700 shadow-sm transition-all active:scale-95"
                     >
                         <Plus size={14} />
                         <span className="hidden sm:inline">Create Issue</span>
@@ -417,9 +428,11 @@ const IssueRow = ({ issue, sprints, onAssignToSprint, showMoveBacklog, isOverlay
                 {showMoveBacklog && (
                     <button
                         onClick={() => onAssignToSprint(issue._id, null)}
-                        className="rounded border border-v-border bg-v-secondary text-xs px-1.5 sm:px-2 py-1 text-v-muted hover:bg-v-primary transition-colors whitespace-nowrap"
+                        title="Move back to backlog"
+                        aria-label="Move back to backlog"
+                        className="rounded-lg border border-v-border bg-v-secondary text-xs px-2 py-1 text-v-muted hover:text-v-main hover:bg-v-primary transition-colors whitespace-nowrap flex items-center gap-1"
                     >
-                        ↩
+                        <span>↩ Backlog</span>
                     </button>
                 )}
             </div>

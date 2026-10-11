@@ -342,9 +342,27 @@ const DashboardLayout = () => {
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm text-v-muted flex-shrink-0 relative">
+                    <div className="flex items-center gap-2 sm:gap-3 text-sm text-v-muted flex-shrink-0 relative">
+                        {/* Command Palette Trigger */}
+                        <button
+                            onClick={() => {
+                                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+                            }}
+                            className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-v-border bg-v-secondary text-xs text-v-muted hover:text-v-main hover:border-blue-500/40 transition-colors"
+                            aria-label="Search and quick actions (Ctrl+K)"
+                            title="Command Palette (Ctrl+K)"
+                        >
+                            <span className="text-v-muted">Search…</span>
+                            <kbd className="font-mono text-[10px] bg-v-primary px-1.5 py-0.5 rounded border border-v-border">⌘K</kbd>
+                        </button>
+
                         {/* Meetings Quick Link */}
-                        <Link to="/meetings" className="p-2 text-v-muted hover:text-v-main rounded-full hover:bg-v-secondary transition-colors" title="Meetings">
+                        <Link
+                            to="/meetings"
+                            className="p-2 text-v-muted hover:text-v-main rounded-full hover:bg-v-secondary transition-colors"
+                            title="Meetings"
+                            aria-label="Meetings"
+                        >
                             <Video size={18} />
                         </Link>
                         
@@ -352,8 +370,10 @@ const DashboardLayout = () => {
                         <button
                             onClick={toggleTheme}
                             className="p-2 text-v-muted hover:text-v-main rounded-full hover:bg-v-secondary transition-colors"
+                            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                         >
-                            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                            {isDarkMode ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
                         </button>
 
                         {/* Notification Bell */}
@@ -361,10 +381,12 @@ const DashboardLayout = () => {
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
                                 className="relative p-2 text-v-muted hover:text-v-main rounded-full hover:bg-v-secondary transition-colors"
+                                aria-label="Notifications"
+                                title="Notifications"
                             >
                                 <Bell size={18} />
                                 {unreadCount > 0 && (
-                                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-v-primary">
                                         {unreadCount > 9 ? '9+' : unreadCount}
                                     </span>
                                 )}
@@ -374,26 +396,36 @@ const DashboardLayout = () => {
                             {showNotifications && (
                                 <>
                                     <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-                                    <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl bg-white shadow-xl ring-1 ring-black/5 z-50 overflow-hidden transform opacity-100 scale-100">
-                                        <div className="flex items-center justify-between border-b px-4 py-3 bg-gray-50/50">
-                                            <h3 className="font-semibold text-gray-800">Notifications</h3>
+                                    <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl bg-v-primary border border-v-border shadow-2xl z-50 overflow-hidden transform opacity-100 scale-100 animate-in fade-in">
+                                        <div className="flex items-center justify-between border-b border-v-border px-4 py-3 bg-v-secondary/80">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="font-semibold text-sm text-v-main">Notifications</h3>
+                                                {unreadCount > 0 && (
+                                                    <span className="text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                                                        {unreadCount} new
+                                                    </span>
+                                                )}
+                                            </div>
                                             {unreadCount > 0 && (
                                                 <button
                                                     onClick={() => {
                                                         dispatch(markAllAsRead());
                                                         setShowNotifications(false);
                                                     }}
-                                                    className="text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                                                    className="text-xs font-medium text-blue-500 hover:text-blue-600 hover:underline"
                                                 >
                                                     Mark all as read
                                                 </button>
                                             )}
                                         </div>
-                                        <div className="max-h-96 overflow-y-auto w-full divide-y divide-gray-50">
+                                        <div className="max-h-96 overflow-y-auto w-full divide-y divide-v-border">
                                             {notifications.length === 0 ? (
-                                                <div className="p-8 text-center text-sm text-gray-500 flex flex-col items-center">
-                                                    <Bell size={24} className="text-gray-300 mb-2" />
-                                                    All caught up!
+                                                <div className="p-8 text-center text-sm text-v-muted flex flex-col items-center">
+                                                    <div className="h-10 w-10 rounded-full bg-v-secondary flex items-center justify-center mb-2">
+                                                        <Bell size={18} className="text-v-muted" />
+                                                    </div>
+                                                    <p className="font-medium text-v-main">All caught up!</p>
+                                                    <p className="text-xs text-v-muted mt-0.5">No new notifications right now</p>
                                                 </div>
                                             ) : (
                                                 notifications.map(n => (
@@ -406,26 +438,26 @@ const DashboardLayout = () => {
                                                                 navigate(`/project/${currentProject._id}/board`);
                                                             }
                                                         }}
-                                                        className={`flex gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!n.read ? 'bg-blue-50/30' : ''}`}
+                                                        className={`flex gap-3 p-3.5 hover:bg-v-secondary/80 cursor-pointer transition-colors ${!n.read ? 'bg-blue-500/5' : ''}`}
                                                     >
-                                                        <div className="mt-1 flex-shrink-0 relative">
+                                                        <div className="mt-0.5 flex-shrink-0 relative">
                                                             {n.initiator?.name ? (
-                                                                <div className="h-8 w-8 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-bold text-indigo-700">
+                                                                <div className="h-8 w-8 rounded-full bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-500">
                                                                     {n.initiator.name.charAt(0).toUpperCase()}
                                                                 </div>
                                                             ) : (
-                                                                <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                                                <div className="h-8 w-8 rounded-full bg-v-secondary border border-v-border flex items-center justify-center text-v-muted">
                                                                     <Zap size={14} />
                                                                 </div>
                                                             )}
-                                                            {!n.read && <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full border-2 border-white" />}
+                                                            {!n.read && <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-blue-500 rounded-full border-2 border-v-primary" />}
                                                         </div>
                                                         <div className="flex-1 min-w-0 w-full overflow-hidden">
-                                                            <p className="text-sm text-gray-800 leading-snug break-words">
-                                                                {n.initiator && <span className="font-semibold">{n.initiator.name} </span>}
-                                                                <span className="text-gray-600">{n.message}</span>
+                                                            <p className="text-xs sm:text-sm text-v-main leading-snug break-words">
+                                                                {n.initiator && <span className="font-semibold text-v-main">{n.initiator.name} </span>}
+                                                                <span className="text-v-muted">{n.message}</span>
                                                             </p>
-                                                            <p className="mt-1 text-xs text-gray-400 font-medium">
+                                                            <p className="mt-1 text-[11px] text-v-muted/70 font-medium">
                                                                 {format(new Date(n.createdAt), 'MMM d, h:mm a')}
                                                             </p>
                                                         </div>
@@ -439,10 +471,12 @@ const DashboardLayout = () => {
                         </div>
 
                         {/* User Profile */}
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-white text-xs font-bold">
-                            {user.name?.charAt(0).toUpperCase()}
+                        <div className="flex items-center gap-2 pl-1 border-l border-v-border">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-sm">
+                                {user.name?.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="hidden sm:inline text-xs sm:text-sm text-v-main font-semibold max-w-[120px] truncate">{user.name}</span>
                         </div>
-                        <span className="hidden sm:inline text-sm text-v-main font-medium max-w-[120px] truncate">{user.name}</span>
                     </div>
                 </header>
 
@@ -451,11 +485,11 @@ const DashboardLayout = () => {
                 </main>
             </div>
 
-            {/* ── Chat System ── */}
-            <div className="fixed bottom-0 right-6 z-50 flex items-end gap-4 pointer-events-none">
-                {/* Chat Windows (Active Conversation) */}
+            {/* ── Coordinated Floating Chat & Copilot Dock ── */}
+            <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 flex items-end gap-3 pointer-events-none">
+                {/* Active Direct Conversation Window */}
                 {activeConversation && (
-                    <div className="w-80 h-96 pointer-events-auto">
+                    <div className="w-80 sm:w-88 h-96 pointer-events-auto rounded-2xl shadow-2xl border border-v-border bg-v-primary overflow-hidden">
                         <ChatWindow
                             conversation={activeConversation}
                             onClose={() => dispatch(clearActiveConversation())}
@@ -463,29 +497,32 @@ const DashboardLayout = () => {
                     </div>
                 )}
 
-                {/* ── Chat System ── */}
-                <div className="fixed bottom-0 right-6 z-50 flex items-end gap-4 pointer-events-none">
-                    {/* AI Chat Assistant */}
-                    <div className="flex flex-col items-end pointer-events-auto">
-                        <AIChatAssistant projectId={projectId} />
+                {/* Team Chat Sidebar Drawer */}
+                {showChatSidebar && (
+                    <div className="w-80 sm:w-88 h-[480px] pointer-events-auto rounded-2xl shadow-2xl border border-v-border bg-v-primary overflow-hidden">
+                        <ChatSidebar onClose={() => setShowChatSidebar(false)} />
                     </div>
+                )}
 
-                    {/* Chat Sidebar Toggle & List */}
-                    <div className="flex flex-col items-end gap-3 pointer-events-auto">
-                        {showChatSidebar && (
-                            <div className="w-72 h-[500px] mb-2">
-                                <ChatSidebar onClose={() => setShowChatSidebar(false)} />
-                            </div>
-                        )}
+                {/* AI Copilot Assistant */}
+                <div className="pointer-events-auto">
+                    <AIChatAssistant projectId={projectId} />
+                </div>
 
-                        <button
-                            onClick={() => setShowChatSidebar(!showChatSidebar)}
-                            className={`mb-6 h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${showChatSidebar ? 'bg-gray-100 text-gray-600 rotate-90' : 'bg-blue-600 text-white hover:scale-110'
-                                }`}
-                        >
-                            {showChatSidebar ? <X size={24} /> : <MessageSquare size={24} />}
-                        </button>
-                    </div>
+                {/* Chat Floating Trigger */}
+                <div className="pointer-events-auto">
+                    <button
+                        onClick={() => setShowChatSidebar(prev => !prev)}
+                        aria-label={showChatSidebar ? 'Close chat messages' : 'Open chat messages'}
+                        className={`h-12 w-12 sm:h-13 sm:w-13 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 ${
+                            showChatSidebar 
+                                ? 'bg-v-secondary text-v-main border border-v-border rotate-90 hover:bg-v-secondary/80' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 shadow-blue-600/30'
+                        }`}
+                        title="Team Chat"
+                    >
+                        {showChatSidebar ? <X size={20} /> : <MessageSquare size={20} />}
+                    </button>
                 </div>
             </div>
 

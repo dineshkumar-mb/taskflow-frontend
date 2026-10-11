@@ -11,7 +11,7 @@ import IssueModal from './IssueModal';
 import CreateIssueModal from './CreateIssueModal';
 import { MeetingScheduler } from '../meeting/MeetingScheduler';
 import AIRiskPanel from '../dashboard/AIRiskPanel';
-import { Loader2, Plus, Filter, Search, Sparkles } from 'lucide-react';
+import { Loader2, Plus, Filter, Search, Sparkles, X } from 'lucide-react';
 import { BoardPageSkeleton } from '../../components/ui/Skeleton';
 import { socket } from '../../utils/socket';
 import axiosInstance from '../../utils/axiosInstance';
@@ -26,6 +26,7 @@ const BoardPage = () => {
     const { sprints, activeSprint } = useSelector((state) => state.sprint);
     const [selectedIssue, setSelectedIssue] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [createStatus, setCreateStatus] = useState('todo');
     const [sprintFilter, setSprintFilter] = useState('active');
     const [typeFilter, setTypeFilter] = useState('all');
     const [assigneeFilter, setAssigneeFilter] = useState('all');
@@ -239,21 +240,33 @@ const BoardPage = () => {
                 <div className="flex items-center gap-2 flex-wrap sm:ml-auto">
                     {/* JQL Search Bar with AI Button */}
                     <div className="relative flex items-center">
-                        <Search className="absolute left-2.5 h-3.5 w-3.5 text-v-muted" />
+                        <Search className="absolute left-2.5 h-3.5 w-3.5 text-v-muted pointer-events-none" />
                         <input
                             id="board-search-input"
                             type="text"
-                            placeholder="Press / to search..."
+                            placeholder="Search or filter JQL… (Press /)"
                             value={jqlQuery}
                             onChange={(e) => setJqlQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleAIFilter()}
-                            className="w-full sm:w-56 rounded-l-md border border-r-0 border-v-border bg-v-primary py-1.5 pl-8 pr-3 text-xs sm:text-sm text-v-main placeholder:text-v-muted focus:outline-none focus:border-blue-500"
+                            spellCheck={false}
+                            className="w-full sm:w-60 rounded-l-xl border border-r-0 border-v-border bg-v-primary py-1.5 pl-8 pr-7 text-xs sm:text-sm text-v-main placeholder:text-v-muted focus:outline-none focus:ring-1 focus:ring-blue-500"
                         />
+                        {jqlQuery && (
+                            <button
+                                onClick={() => setJqlQuery('')}
+                                className="absolute right-10 p-0.5 text-v-muted hover:text-v-main rounded"
+                                title="Clear search"
+                                aria-label="Clear search"
+                            >
+                                <X size={13} />
+                            </button>
+                        )}
                         <button
                             onClick={handleAIFilter}
                             disabled={isAILoading}
-                            className="flex items-center justify-center rounded-r-md border border-v-border bg-v-secondary px-3 py-1.5 text-v-main hover:bg-purple-500/10 hover:text-purple-400 hover:border-purple-500/50 transition-colors disabled:opacity-50 h-full"
+                            className="flex items-center justify-center rounded-r-xl border border-v-border bg-v-secondary px-3 py-1.5 text-v-main hover:bg-purple-500/10 hover:text-purple-400 hover:border-purple-500/50 transition-colors disabled:opacity-50 h-full"
                             title="Ask AI to filter"
+                            aria-label="Ask AI to filter"
                         >
                             {isAILoading ? <Loader2 size={14} className="animate-spin text-purple-400" /> : <Sparkles size={14} className="text-purple-400" />}
                         </button>
@@ -263,7 +276,8 @@ const BoardPage = () => {
                     <select
                         value={sprintFilter}
                         onChange={e => setSprintFilter(e.target.value)}
-                        className="rounded-md border border-v-border bg-v-primary px-2 py-1.5 text-xs sm:text-sm text-v-main focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        aria-label="Filter by sprint"
+                        className="rounded-xl border border-v-border bg-v-primary px-3 py-1.5 text-xs sm:text-sm text-v-main focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="all">All Issues</option>
                         <option value="active">Active Sprint</option>
@@ -276,7 +290,8 @@ const BoardPage = () => {
                     <select
                         value={typeFilter}
                         onChange={e => setTypeFilter(e.target.value)}
-                        className="rounded-md border border-v-border bg-v-primary px-2 py-1.5 text-xs sm:text-sm text-v-main focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        aria-label="Filter by type"
+                        className="rounded-xl border border-v-border bg-v-primary px-3 py-1.5 text-xs sm:text-sm text-v-main focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="all">All Types</option>
                         <option value="task">Task</option>
@@ -291,7 +306,8 @@ const BoardPage = () => {
                         <select
                             value={assigneeFilter}
                             onChange={e => setAssigneeFilter(e.target.value)}
-                            className="rounded-md border border-v-border bg-v-primary px-2 py-1.5 text-xs sm:text-sm text-v-main focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            aria-label="Filter by assignee"
+                            className="rounded-xl border border-v-border bg-v-primary px-3 py-1.5 text-xs sm:text-sm text-v-main focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="all">All Assignees</option>
                             <option value="unassigned">Unassigned</option>
@@ -302,8 +318,8 @@ const BoardPage = () => {
                     )}
 
                     <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-blue-700 transition-colors flex-shrink-0"
+                        onClick={() => { setCreateStatus('todo'); setIsCreateModalOpen(true); }}
+                        className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white hover:bg-blue-700 shadow-sm transition-all active:scale-95 flex-shrink-0"
                     >
                         <Plus className="h-4 w-4" />
                         <span className="hidden sm:inline">Create Issue</span>
@@ -327,11 +343,15 @@ const BoardPage = () => {
                 >
                     <div className="flex h-full gap-3 sm:gap-4" style={{ minWidth: 'max-content', minHeight: 500 }}>
                         {currentBoard.columns.map((column) => (
-                            <div key={column.status} className="w-64 sm:w-72 flex-shrink-0">
+                            <div key={column.status} className="w-72 sm:w-80 flex-shrink-0">
                                 <Column
                                     column={column}
                                     issues={filteredIssues.filter((i) => i.status === column.status)}
                                     onIssueClick={setSelectedIssue}
+                                    onCreateIssue={(status) => {
+                                        setCreateStatus(status);
+                                        setIsCreateModalOpen(true);
+                                    }}
                                 />
                             </div>
                         ))}
@@ -351,6 +371,7 @@ const BoardPage = () => {
             <CreateIssueModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
+                initialStatus={createStatus}
             />
         </div>
     );

@@ -146,12 +146,12 @@ const AuditLogPage = () => {
                                                 <span className="text-v-main font-medium">{log.entityType}</span>
                                                 {log.entityId && (
                                                     <span className="text-xs text-v-muted ml-2 font-mono" title={log.entityId._id || log.entityId}>
-                                                        {(log.entityId.name || log.entityId.title || log.entityId).substring(0, 8)}...
+                                                        {(log.entityId.name || log.entityId.title || log.entityId).substring(0, 8)}…
                                                     </span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-3 hidden md:table-cell max-w-[200px] truncate text-v-muted text-xs font-mono">
-                                                {log.details ? JSON.stringify(log.details) : '-'}
+                                                {log.details ? JSON.stringify(log.details) : '–'}
                                             </td>
                                             <td className="px-4 py-3 text-right text-v-muted whitespace-nowrap">
                                                 {format(new Date(log.createdAt), 'MMM d, HH:mm')}
@@ -165,22 +165,24 @@ const AuditLogPage = () => {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between px-4 py-3 bg-v-bg border-t border-v-border">
+                        <div className="flex items-center justify-between px-4 py-3 bg-v-secondary border-t border-v-border">
                             <span className="text-sm text-v-muted">
-                                Page <span className="font-medium text-v-main">{page}</span> of <span className="font-medium text-v-main">{totalPages}</span>
+                                Page <span className="font-medium text-v-main font-mono">{page}</span> of <span className="font-medium text-v-main font-mono">{totalPages}</span>
                             </span>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
-                                    className="p-1 rounded bg-v-component border border-v-border text-v-main disabled:opacity-50 disabled:cursor-not-allowed hover:bg-v-border transition-colors"
+                                    aria-label="Previous page"
+                                    className="p-1.5 rounded-lg bg-v-primary border border-v-border text-v-main disabled:opacity-40 disabled:cursor-not-allowed hover:bg-v-secondary transition-colors"
                                 >
                                     <ChevronLeft size={16} />
                                 </button>
                                 <button
                                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                     disabled={page === totalPages}
-                                    className="p-1 rounded bg-v-component border border-v-border text-v-main disabled:opacity-50 disabled:cursor-not-allowed hover:bg-v-border transition-colors"
+                                    aria-label="Next page"
+                                    className="p-1.5 rounded-lg bg-v-primary border border-v-border text-v-main disabled:opacity-40 disabled:cursor-not-allowed hover:bg-v-secondary transition-colors"
                                 >
                                     <ChevronRight size={16} />
                                 </button>

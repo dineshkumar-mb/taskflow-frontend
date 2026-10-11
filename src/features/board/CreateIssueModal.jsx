@@ -21,7 +21,7 @@ const issueSchema = z.object({
     dueDate: z.string().optional(),
 });
 
-const CreateIssueModal = ({ isOpen, onClose }) => {
+const CreateIssueModal = ({ isOpen, onClose, initialStatus = 'todo' }) => {
     const { projectId } = useParams();
     const dispatch = useDispatch();
     const { user } = useSelector(state => state.auth);
@@ -35,6 +35,16 @@ const CreateIssueModal = ({ isOpen, onClose }) => {
         resolver: zodResolver(issueSchema),
         defaultValues: { priority: 'medium', type: 'task' },
     });
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
 
     useEffect(() => {
         if (isOpen && user) {
@@ -58,7 +68,7 @@ const CreateIssueModal = ({ isOpen, onClose }) => {
             priority: data.priority,
             type: data.type,
             project: projectId,
-            status: 'todo',
+            status: initialStatus || 'todo',
             ...(assigneeId && { assignee: assigneeId }),
             ...(sprintId && { sprint: sprintId }),
             ...(data.storyPoints && { storyPoints: Number(data.storyPoints) }),
